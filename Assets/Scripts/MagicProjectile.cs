@@ -28,6 +28,7 @@ public class MagicProjectile : MonoBehaviour
         else if (!other.CompareTag("Player")) // Only ignore player collisions
         {
             Destroy(gameObject); // Hit wall/ground/other object
+            //comment
         }
     }
 }
