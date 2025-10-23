@@ -196,4 +196,6 @@ private float currentSpeedParameter = 0f;
             Gizmos.DrawRay(origin, Vector3.down * groundCheckDistance);
         }
     }
+
+    public PlayerStats GetPlayerStats() => playerStats;
 }
