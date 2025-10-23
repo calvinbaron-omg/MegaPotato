@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4961392323306338389
+--- !u!1 &3854896913943547373
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,51 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6718784265033243768}
-  - component: {fileID: 7514240180702460012}
-  - component: {fileID: 7306703649858787593}
-  - component: {fileID: 2305617940809160454}
-  - component: {fileID: 4523018644616147468}
-  - component: {fileID: -4202193994695927290}
-  - component: {fileID: 9045020640741173937}
-  - component: {fileID: -1145366193651348206}
+  - component: {fileID: 5356579340301832718}
+  - component: {fileID: 6490088607003698745}
+  - component: {fileID: 4956456902217615039}
+  - component: {fileID: 1738198550150323531}
+  - component: {fileID: -4422012984082559735}
+  - component: {fileID: -4703159581318946753}
   m_Layer: 0
-  m_Name: RedEnemyPreFab
-  m_TagString: Enemy
+  m_Name: FireballPreFab
+  m_TagString: Projectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6718784265033243768
+--- !u!4 &5356579340301832718
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
+  m_GameObject: {fileID: 3854896913943547373}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7514240180702460012
+--- !u!33 &6490088607003698745
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &7306703649858787593
+  m_GameObject: {fileID: 3854896913943547373}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &4956456902217615039
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
+  m_GameObject: {fileID: 3854896913943547373}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -71,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5060b71f5f9c83849a7548db26dfe662, type: 2}
+  - {fileID: 2100000, guid: 299c6ce849a433c4384090902ea5b35b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -94,13 +92,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &2305617940809160454
-CapsuleCollider:
+--- !u!135 &1738198550150323531
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
+  m_GameObject: {fileID: 3854896913943547373}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -109,21 +107,19 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &4523018644616147468
+--- !u!54 &-4422012984082559735
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
+  m_GameObject: {fileID: 3854896913943547373}
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
@@ -139,54 +135,33 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &-4202193994695927290
+--- !u!114 &-4703159581318946753
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
+  m_GameObject: {fileID: 3854896913943547373}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: edc971c56ca1b2b4db94970f964a743f, type: 3}
+  m_Script: {fileID: 11500000, guid: 46841a53891578345996e9aa4734696d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 100
-  currentHealth: 0
-  onDamageTaken:
-    m_PersistentCalls:
-      m_Calls: []
-  onDeath:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &9045020640741173937
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e2cef6c4bb60874bb99179a18f1a289, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyChase
-  chaseSpeed: 3
-  damageAmount: 20
---- !u!114 &-1145366193651348206
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4961392323306338389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e381eb3cb8d89e0469bdc9cf2fdcc9e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyStatus
+  m_EditorClassIdentifier: Assembly-CSharp::SpellFireball
+  speed: 6
+  damage: 25
+  lifetime: 3
+  direction: {x: 0, y: 0, z: 0}
+  baseCooldown: 0.8
+  baseRange: 8
+  burnChance: 0.25
+  burnDamage: 5
+  burnDuration: 3
+  aoeRadius: 4
+  spellName: Fireball
+  description: Launches a fireball that explodes on impact
+  icon: {fileID: 0}

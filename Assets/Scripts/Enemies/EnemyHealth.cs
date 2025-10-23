@@ -4,22 +4,20 @@ public class EnemyHealth : Health
 {
     public override void TakeDamage(float amount)
     {
-        Debug.Log($"Enemy taking {amount} damage. Current health: {currentHealth}");
+        // Apply damage using base health system
         base.TakeDamage(amount);
-        Debug.Log($"Enemy health after damage: {currentHealth}");
     }
 
     protected override void HandleDeath()
     {
-        Debug.Log($"Enemy HandleDeath called! Health: {currentHealth}");
-        
+        // Add to kill count when enemy dies
         ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
         if (scoreManager != null)
         {
             scoreManager.AddKill();
         }
         
-        Debug.Log("Destroying enemy...");
+        // Remove enemy from game
         Destroy(gameObject);
     }
 }

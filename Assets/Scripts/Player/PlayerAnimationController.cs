@@ -6,20 +6,21 @@ public class PlayerAnimationController : MonoBehaviour
     
     void Start()
     {
+        // Get reference to the Animator component
         animator = GetComponent<Animator>();
     }
     
     void Update()
     {
-        // Use the same input values as your movement script
+        // Get player input axes (WASD/Arrow keys)
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
         
-        // Calculate input magnitude (0-1 range)
+        // Calculate input magnitude (0 when still, 1 when full input)
         float inputMagnitude = new Vector3(h, 0, v).magnitude;
         
-        // Set animation parameters
-        animator.SetFloat("Speed", inputMagnitude);
-        animator.SetBool("IsRunning", Input.GetKey(KeyCode.LeftShift));
+        // Update animator parameters
+        animator.SetFloat("Speed", inputMagnitude);           // Controls Idle/Walk/Run blend
+        animator.SetBool("IsRunning", Input.GetKey(KeyCode.LeftShift)); // Sprint state
     }
 }

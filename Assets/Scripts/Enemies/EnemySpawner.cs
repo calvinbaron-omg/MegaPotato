@@ -2,37 +2,39 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    public GameObject[] enemyPrefabs;  // assign all enemy prefabs here
+    public GameObject[] enemyPrefabs;  // Assign all enemy prefabs here
     public Transform player;
 
     [Header("Spawn Settings")]
-    public float minDistanceFromPlayer = 10f;
-    public float spawnRangeX = 20f;
-    public float spawnRangeZ = 20f;
+    public float minDistanceFromPlayer = 10f;  // Minimum distance from player to spawn
+    public float spawnRangeX = 20f;            // X-axis spawn area
+    public float spawnRangeZ = 20f;            // Z-axis spawn area
 
     [Header("Spawn Timing")]
-    public float spawnInterval = 5f;    // seconds between spawns
-    public float startDelay = 2f;       // initial delay
-    public int enemiesPerSpawn = 2;     // how many enemies to spawn each interval
+    public float spawnInterval = 5f;    // Seconds between spawn waves
+    public float startDelay = 2f;       // Initial delay before first spawn
+    public int enemiesPerSpawn = 2;     // How many enemies to spawn each interval
 
     private float spawnTimer = 0f;
 
     void Start()
     {
-        spawnTimer = -startDelay; // wait before first spawn
+        // Set initial timer to wait before first spawn
+        spawnTimer = -startDelay;
     }
 
     void Update()
     {
         spawnTimer += Time.deltaTime;
 
+        // Spawn enemies when timer reaches interval
         if (spawnTimer >= spawnInterval)
         {
             for (int i = 0; i < enemiesPerSpawn; i++)
             {
                 SpawnEnemyAtRandomPosition();
             }
-            spawnTimer = 0f;
+            spawnTimer = 0f; // Reset timer for next spawn wave
         }
     }
 
@@ -41,6 +43,7 @@ public class EnemySpawner : MonoBehaviour
         Vector3 spawnPos;
         int attempts = 0;
 
+        // Find a spawn position far enough from player
         do
         {
             float x = Random.Range(-spawnRangeX, spawnRangeX);
@@ -49,12 +52,10 @@ public class EnemySpawner : MonoBehaviour
             attempts++;
         } while (Vector3.Distance(spawnPos, player.position) < minDistanceFromPlayer && attempts < 100);
 
-        if (enemyPrefabs.Length == 0)
-        {
-            Debug.LogWarning("No enemy prefabs assigned!");
-            return;
-        }
+        // Safety check for assigned prefabs
+        if (enemyPrefabs.Length == 0) return;
 
+        // Spawn random enemy from available prefabs
         GameObject enemyToSpawn = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
         Instantiate(enemyToSpawn, spawnPos, Quaternion.identity);
     }
