@@ -64,7 +64,7 @@ public class PlayerHealth : Health
     protected override void HandleDeath()
     {
         // Trigger game over when player dies
-        GameManager gameManager = FindObjectOfType<GameManager>();
+        GameManager gameManager = FindAnyObjectByType<GameManager>();
         if (gameManager != null)
         {
             gameManager.TriggerGameOver();

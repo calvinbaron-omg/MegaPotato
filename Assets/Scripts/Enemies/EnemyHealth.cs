@@ -11,7 +11,7 @@ public class EnemyHealth : Health
     protected override void HandleDeath()
     {
         // Add to kill count when enemy dies
-        ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
+        ScoreManager scoreManager = FindAnyObjectByType<ScoreManager>();
         if (scoreManager != null)
         {
             scoreManager.AddKill();
