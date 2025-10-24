@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 [Serializable]
 public class PlayerStats : MonoBehaviour
@@ -180,5 +181,30 @@ public class PlayerStats : MonoBehaviour
     public float CalculateLifeSteal(float damageDealt)
     {
         return damageDealt * (CurrentLifeSteal / 100f);
+    }
+
+    public IEnumerator SpeedBoost(float multiplier, float duration)
+    {
+        moveSpeedModifier *= multiplier;
+        CalculateFinalStats();
+        yield return new WaitForSeconds(duration);
+        moveSpeedModifier /= multiplier;
+        CalculateFinalStats();
+    }
+
+    public IEnumerator DamageBoost(float multiplier, float duration)
+    {
+        // baseDamage *= multiplier;
+        // yield return new WaitForSeconds(duration);
+        // baseDamage /= multiplier;
+        return null;
+    }
+
+    public IEnumerator ActivateShield(float duration)
+    {
+        // isShielded = true;
+        // yield return new WaitForSeconds(duration);
+        // isShielded = false;
+        return null;
     }
 }
