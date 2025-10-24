@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: -4202193994695927290}
   - component: {fileID: 9045020640741173937}
   - component: {fileID: -1145366193651348206}
+  - component: {fileID: 7769782340225340377}
   m_Layer: 0
   m_Name: RedEnemyPreFab
   m_TagString: Enemy
@@ -190,3 +191,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e381eb3cb8d89e0469bdc9cf2fdcc9e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStatus
+--- !u!114 &7769782340225340377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4961392323306338389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e96cc0be83a6894e92f3df058a0b784, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PickupDrop
+  dropChances:
+  - pickupType: 0
+    dropChance: 100
+  - pickupType: 2
+    dropChance: 50
+  - pickupType: 3
+    dropChance: 50
+  - pickupType: 4
+    dropChance: 50
