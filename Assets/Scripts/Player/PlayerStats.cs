@@ -17,6 +17,12 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float baseJumpHeight = 8f;
     [SerializeField] private int baseMaxJumps = 1;
 
+    [Header("Collection Stats")]
+    [SerializeField] private float baseCollectionRadius = 1f; // Multiplier base
+    [SerializeField] private float baseXPMultiplier = 1f;
+    [SerializeField] private float baseGoldMultiplier = 1f;
+    [SerializeField] private float baseSilverMultiplier = 1f;
+
     [Header("Current Stats (Read Only)")]
     public float CurrentAttackSpeed { get; private set; }
     public float CurrentDamage { get; private set; }
@@ -26,6 +32,10 @@ public class PlayerStats : MonoBehaviour
     public float CurrentMoveSpeed { get; private set; }
     public float CurrentJumpHeight { get; private set; }
     public int CurrentMaxJumps { get; private set; }
+    public float CurrentCollectionRadiusMultiplier { get; private set; }
+    public float CurrentXPMultiplier { get; private set; }
+    public float CurrentGoldMultiplier { get; private set; }
+    public float CurrentSilverMultiplier { get; private set; }
 
     // Events for UI updates when stats change
     public event Action OnStatsChanged;
@@ -35,8 +45,12 @@ public class PlayerStats : MonoBehaviour
     private float damageModifier = 1.0f;
     private float moveSpeedModifier = 1.0f;
     private float jumpHeightModifier = 1.0f;
+    private float collectionRadiusModifier = 1.0f;
+    private float xpMultiplierModifier = 1.0f;
+    private float goldMultiplierModifier = 1.0f;
+    private float silverMultiplierModifier = 1.0f;
 
-    void Start()
+     void Start()
     {
         CalculateFinalStats();
     }
@@ -52,13 +66,41 @@ public class PlayerStats : MonoBehaviour
         CurrentMoveSpeed = baseMoveSpeed * moveSpeedModifier;
         CurrentJumpHeight = baseJumpHeight * jumpHeightModifier;
         CurrentMaxJumps = baseMaxJumps;
+        
+        // New collection multipliers
+        CurrentCollectionRadiusMultiplier = baseCollectionRadius * collectionRadiusModifier;
+        CurrentXPMultiplier = baseXPMultiplier * xpMultiplierModifier;
+        CurrentGoldMultiplier = baseGoldMultiplier * goldMultiplierModifier;
+        CurrentSilverMultiplier = baseSilverMultiplier * silverMultiplierModifier;
 
         // Notify listeners that stats have changed
         OnStatsChanged?.Invoke();
     }
 
     // ===== PUBLIC METHODS FOR POWER-UPS =====
+    public void AddCollectionRadius(float multiplier)
+    {
+        collectionRadiusModifier += multiplier;
+        CalculateFinalStats();
+    }
 
+    public void AddXPMultiplier(float multiplier)
+    {
+        xpMultiplierModifier += multiplier;
+        CalculateFinalStats();
+    }
+
+    public void AddGoldMultiplier(float multiplier)
+    {
+        goldMultiplierModifier += multiplier;
+        CalculateFinalStats();
+    }
+
+    public void AddSilverMultiplier(float multiplier)
+    {
+        silverMultiplierModifier += multiplier;
+        CalculateFinalStats();
+    }
     public void AddAttackSpeed(float multiplier)
     {
         attackSpeedModifier += multiplier;
@@ -109,6 +151,10 @@ public class PlayerStats : MonoBehaviour
 
     // ===== GETTER METHODS FOR OTHER SCRIPTS =====
 
+    public float GetCollectionRadiusMultiplier() => CurrentCollectionRadiusMultiplier;
+    public float GetXPMultiplier() => CurrentXPMultiplier;
+    public float GetGoldMultiplier() => CurrentGoldMultiplier;
+    public float GetSilverMultiplier() => CurrentSilverMultiplier;
     public float GetAttackSpeed() => CurrentAttackSpeed;
     public float GetDamage() => CurrentDamage;
     public float GetLifeSteal() => CurrentLifeSteal;

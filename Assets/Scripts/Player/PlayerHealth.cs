@@ -54,6 +54,24 @@ public class PlayerHealth : Health
         }
     }
 
+    // NEW METHOD: Add healing functionality
+    public void Heal(float healAmount)
+    {
+        if (healAmount <= 0) return;
+        
+        currentHealth += healAmount;
+        
+        // Clamp health to not exceed max health
+        if (currentHealth > maxHealth)
+        {
+            currentHealth = maxHealth;
+        }
+        
+        Debug.Log($"Healed for {healAmount}! Current health: {currentHealth}/{maxHealth}");
+        
+        // Optional: Add healing visual/audio effects here later
+    }
+
     private void StartInvincibility()
     {
         // Begin invincibility period with visual feedback
