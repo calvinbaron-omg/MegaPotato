@@ -10,7 +10,6 @@ public class Pickup : MonoBehaviour
     
     public void Collect()
     {
-        Debug.Log($"Collected {pickupType} with value {value}");
         Destroy(gameObject);
     }
 }
