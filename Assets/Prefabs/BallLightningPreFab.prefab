@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 4956456902217615039}
   - component: {fileID: 1738198550150323531}
   - component: {fileID: -4422012984082559735}
-  - component: {fileID: 2484930716012078040}
+  - component: {fileID: -5410956414509754799}
   m_Layer: 0
-  m_Name: FrozenOrbPreFab
+  m_Name: BallLightningPreFab
   m_TagString: Projectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -69,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0284dd58f95849a4b80c2b98348a80ce, type: 2}
+  - {fileID: 2100000, guid: 29c5d0f319fc7bf4899721e41cc8a6d7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -140,7 +140,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &2484930716012078040
+--- !u!114 &-5410956414509754799
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -149,19 +149,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 3854896913943547373}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 043c8bbf106713c44a5ae4cd57ca022d, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e5337e5f2481ab46847ea0e26453ce1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpellFrozenOrb
-  spellName: Frozen Orb
-  description: A frozen orb spell
+  m_EditorClassIdentifier: Assembly-CSharp::SpellBallLightning
+  spellName: Ball Lightning
+  description: A ball of lightning
   icon: {fileID: 0}
   baseDamage: 25
-  baseCooldown: 1
+  baseCooldown: 1.2
   baseRange: 8
   projectileSpeed: 8
   lifetime: 3
   spellPrefab: {fileID: 3854896913943547373}
-  slowChance: 0.3
-  slowAmount: 0.5
-  slowDuration: 2
+  slowChance: 0.2
+  slowAmount: 1
+  slowDuration: 1
   aoeRadius: 3
