@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4956456902217615039}
   - component: {fileID: 1738198550150323531}
   - component: {fileID: -4422012984082559735}
-  - component: {fileID: -4703159581318946753}
+  - component: {fileID: 1722155957061736827}
   m_Layer: 0
   m_Name: FireballPreFab
   m_TagString: Projectile
@@ -140,7 +140,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &-4703159581318946753
+--- !u!114 &1722155957061736827
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -149,19 +149,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 3854896913943547373}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46841a53891578345996e9aa4734696d, type: 3}
+  m_Script: {fileID: 11500000, guid: 3f2441841ae9be74e85d06c6018833b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpellFireball
-  speed: 6
-  damage: 25
-  lifetime: 3
-  direction: {x: 0, y: 0, z: 0}
-  baseCooldown: 0.8
+  spellName: Fire Ball
+  description: A fire ball spell
+  icon: {fileID: 0}
+  baseDamage: 25
+  baseCooldown: 1.2
   baseRange: 8
+  projectileSpeed: 8
+  lifetime: 3
+  spellPrefab: {fileID: 3854896913943547373}
   burnChance: 0.25
   burnDamage: 5
   burnDuration: 3
   aoeRadius: 4
-  spellName: Fireball
-  description: Launches a fireball that explodes on impact
-  icon: {fileID: 0}

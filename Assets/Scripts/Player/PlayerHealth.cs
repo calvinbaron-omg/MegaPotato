@@ -67,9 +67,6 @@ public class PlayerHealth : Health
             currentHealth = maxHealth;
         }
         
-        Debug.Log($"Healed for {healAmount}! Current health: {currentHealth}/{maxHealth}");
-        
-        // Optional: Add healing visual/audio effects here later
     }
 
     private void StartInvincibility()
@@ -88,7 +85,6 @@ public class PlayerHealth : Health
             gameManager.TriggerGameOver();
         }
         
-        // Deactivate player (for potential respawn system)
         gameObject.SetActive(false);
     }
     

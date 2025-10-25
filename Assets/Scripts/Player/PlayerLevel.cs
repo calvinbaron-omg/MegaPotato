@@ -30,20 +30,24 @@ public class PlayerLevel : MonoBehaviour
         UpdateUI();
     }
     
-    void CheckForLevelUp()
+   void CheckForLevelUp()
+{
+    while (currentXP >= xpToNextLevel)
     {
-        while (currentXP >= xpToNextLevel)
+        currentXP -= xpToNextLevel;
+        currentLevel++;
+        CalculateXPForNextLevel();
+        
+        // Trigger event for other scripts
+        OnLevelUp?.Invoke(currentLevel);
+        Debug.Log(" OnLevelUp?.Invoked");
+        // Double check the event is being called
+        if (OnLevelUp == null)
         {
-            // Level up!
-            currentXP -= xpToNextLevel;
-            currentLevel++;
-            // Recalculate for next level
-            CalculateXPForNextLevel();
-            
-            // Trigger event for other scripts
-            OnLevelUp?.Invoke(currentLevel);
+            Debug.Log("OnLevelUp event has no subscribers!");
         }
     }
+}
     
     void CalculateXPForNextLevel()
     {
@@ -53,6 +57,6 @@ public class PlayerLevel : MonoBehaviour
     
     void UpdateUI()
     {
-        Debug.Log($"Level {currentLevel} - XP: {currentXP}/{xpToNextLevel}");
+        //Debug.Log($"Level {currentLevel} - XP: {currentXP}/{xpToNextLevel}");
     }
 }
