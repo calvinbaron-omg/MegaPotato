@@ -37,15 +37,7 @@ public class PlayerLevel : MonoBehaviour
         currentXP -= xpToNextLevel;
         currentLevel++;
         CalculateXPForNextLevel();
-        
-        // Trigger event for other scripts
         OnLevelUp?.Invoke(currentLevel);
-        Debug.Log(" OnLevelUp?.Invoked");
-        // Double check the event is being called
-        if (OnLevelUp == null)
-        {
-            Debug.Log("OnLevelUp event has no subscribers!");
-        }
     }
 }
     
@@ -53,6 +45,7 @@ public class PlayerLevel : MonoBehaviour
     {
         // Use Mathf.RoundToInt to avoid floating point precision issues
         xpToNextLevel = Mathf.RoundToInt(baseXPRequired * Mathf.Pow(xpMultiplierPerLevel, currentLevel - 1));
+
     }
     
     void UpdateUI()

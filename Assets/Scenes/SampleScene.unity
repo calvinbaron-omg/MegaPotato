@@ -1725,7 +1725,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &793423547
 Transform:
   m_ObjectHideFlags: 0
@@ -2841,6 +2841,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAutoAttack
   globalAttackSpeed: 1
   globalRangeBonus: 0
+  maxEquippedSpells: 2
   equippedSpells:
   - {fileID: 3854896913943547373, guid: db4b7ede5e8c97746889d7f9b53488da, type: 3}
 --- !u!1 &1896554197
