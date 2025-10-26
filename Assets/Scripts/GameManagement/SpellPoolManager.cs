@@ -29,7 +29,7 @@ public class SpellPoolManager : MonoBehaviour
 
     void InitializeSpellPool()
     {
-        // Start with all spells unlocked (you can restrict this later)
+        // Start with all spells unlocked
         unlockedSpells = new List<GameObject>(allSpellPrefabs);
     }
 
@@ -55,11 +55,9 @@ public class SpellPoolManager : MonoBehaviour
         }
 
         int totalOptions = GetCurrentMaxOptions();
-
         bool canEquipNewSpell = player.CanEquipNewSpell();
         List<BaseProjectileSpell> upgradableSpells = player.GetUpgradeableSpells();
 
-        // Track which spells we’ve already used for upgrades
         HashSet<BaseProjectileSpell> usedUpgrades = new HashSet<BaseProjectileSpell>();
 
         // =====================================================
@@ -67,18 +65,15 @@ public class SpellPoolManager : MonoBehaviour
         // =====================================================
         if (canEquipNewSpell)
         {
-            // Split the total between new spells and upgrades
             int newSpellCount = Mathf.Clamp(totalOptions / 2, 1, totalOptions);
             int upgradeCount = totalOptions - newSpellCount;
 
-            // Prepare shuffled upgradable spell list (to ensure random and unique)
             List<BaseProjectileSpell> shuffledUpgradable = new List<BaseProjectileSpell>(upgradableSpells);
             ShuffleList(shuffledUpgradable);
 
-            // Limit upgrades to unique spells only
             upgradeCount = Mathf.Min(upgradeCount, shuffledUpgradable.Count);
 
-            // Add UPGRADE options first (since those depend on current loadout)
+            // Add upgrade options first
             for (int i = 0; i < upgradeCount; i++)
             {
                 BaseProjectileSpell target = shuffledUpgradable[i];
@@ -96,7 +91,7 @@ public class SpellPoolManager : MonoBehaviour
                 }
             }
 
-            // If we didn’t have enough upgradable spells, fill the rest with NEW spells
+            // Fill remaining with new spells
             int remaining = totalOptions - finalOptions.Count;
             if (remaining > 0)
             {
@@ -118,7 +113,6 @@ public class SpellPoolManager : MonoBehaviour
         // =====================================================
         else
         {
-            // Only upgrades, unique per spell
             List<BaseProjectileSpell> shuffledUpgradable = new List<BaseProjectileSpell>(upgradableSpells);
             ShuffleList(shuffledUpgradable);
 
@@ -180,15 +174,34 @@ public class SpellPoolManager : MonoBehaviour
         for (int i = 0; i < list.Count; i++)
         {
             T temp = list[i];
-            int randomIndex = Random.Range(i, list.Count);
-            list[i] = list[randomIndex];
-            list[randomIndex] = temp;
+            int r = Random.Range(i, list.Count);
+            list[i] = list[r];
+            list[r] = temp;
         }
+    }
+
+    // =====================================================
+    // 🧹 RESET FOR NEW RUN
+    // =====================================================
+    public void ResetAllSpellsToBase()
+    {
+        foreach (GameObject spellPrefab in allSpellPrefabs)
+        {
+            if (spellPrefab == null) continue;
+
+            BaseProjectileSpell spell = spellPrefab.GetComponent<BaseProjectileSpell>();
+            if (spell != null)
+            {
+                spell.ResetToBaseStats();
+            }
+        }
+
+        Debug.Log("SpellPoolManager: All spells reset to base stats for new run.");
     }
 }
 
 // =====================================================
-// 🧩 DATA STRUCTURES
+// DATA STRUCTURES
 // =====================================================
 public enum LevelUpChoiceType
 {

@@ -4,103 +4,69 @@ using System.Collections.Generic;
 public class SpellBallLightning : BaseProjectileSpell
 {
     [Header("Ball Lightning Settings")]
-    [SerializeField] private float shockChance = 0.25f; // chance to stun or shock
-    [SerializeField] private float shockAmount = 1.0f;  // 1.0f = full stun
+    [SerializeField] private float shockChance = 0.25f;
+    [SerializeField] private float shockAmount = 1.0f; // 1 = full stun
     [SerializeField] private float shockDuration = 1.5f;
-    [SerializeField] private float aoeRadius = 2.5f;
-
-    [Header("Critical Stats")]
-    [SerializeField] private float critChance = 0.05f;
-    [SerializeField] private float critDamageMultiplier = 2.0f;
-
-    [Header("Projectile Count")]
-    [SerializeField] private int projectileCount = 1;
 
     public override void CastSpell(Transform caster, Vector3 targetPosition)
     {
-        // Later, when adding multiple projectiles, you can loop here.
-        GameObject lightning = CreateProjectile(caster, targetPosition);
+        PlayerStats stats = caster.GetComponent<PlayerStats>();
+        if (stats == null)
+        {
+            Debug.LogError("PlayerStats missing on caster!");
+            return;
+        }
 
+        var effective = CalculateEffectiveStats(stats);
+
+        GameObject lightning = CreateProjectile(caster, targetPosition);
         BallLightningBehavior behavior = lightning.AddComponent<BallLightningBehavior>();
+
         behavior.Initialize(
             targetPosition,
-            projectileSpeed,
+            effective.projectileSpeed,
             lifetime,
-            baseDamage,
+            effective.damage,
             shockChance,
             shockAmount,
             shockDuration,
-            aoeRadius,
-            critChance,
-            critDamageMultiplier
+            effective.aoe,
+            effective.critChance,
+            effective.critDamage
         );
     }
 
-    // ===== Upgrade System Overrides =====
-    public override List<SpellStatType> GetUpgradeableStats()
-    {
-        return new List<SpellStatType>
-        {
+    public override List<SpellStatType> GetUpgradeableStats() =>
+        new List<SpellStatType> {
             SpellStatType.Damage,
-            SpellStatType.ProjectileSpeed,
             SpellStatType.Size,
             SpellStatType.CritChance,
             SpellStatType.CritDamage,
-            SpellStatType.ProjectileCount
+            SpellStatType.AttackSpeed
         };
-    }
 
     public override float GetBaseUpgradeValue(SpellStatType statType)
     {
         switch (statType)
         {
             case SpellStatType.Damage: return 0.10f;
-            case SpellStatType.ProjectileSpeed: return 0.10f;
             case SpellStatType.Size: return 0.10f;
             case SpellStatType.CritChance: return 0.05f;
             case SpellStatType.CritDamage: return 0.20f;
+            case SpellStatType.AttackSpeed: return 0.10f;
             default: return 0f;
         }
     }
 
-    public override (bool isFlat, int flatAmount) GetFlatUpgradeInfo(SpellStatType statType)
-    {
-        if (statType == SpellStatType.ProjectileCount)
-            return (true, 1);
-        return base.GetFlatUpgradeInfo(statType);
-    }
-
-    public override void ApplyStatUpgrade(SpellStatType statType, float effectiveValue, int flatAmountIfAny = 0)
+    public override void ApplyStatUpgrade(SpellStatType statType, float val, int flat = 0)
     {
         switch (statType)
         {
-            case SpellStatType.Damage:
-                baseDamage *= (1f + effectiveValue);
-                break;
-            case SpellStatType.ProjectileSpeed:
-                projectileSpeed *= (1f + effectiveValue);
-                break;
-            case SpellStatType.Size:
-                aoeRadius *= (1f + effectiveValue);
-                break;
-            case SpellStatType.CritChance:
-                critChance += effectiveValue;
-                break;
-            case SpellStatType.CritDamage:
-                critDamageMultiplier *= (1f + effectiveValue);
-                break;
-            case SpellStatType.ProjectileCount:
-                projectileCount += flatAmountIfAny;
-                break;
-            case SpellStatType.AttackSpeed:
-                baseCooldown *= (1f - effectiveValue);
-                break;
+            case SpellStatType.Damage: spellDamageMultiplier *= (1f + val); break;
+            case SpellStatType.Size: spellSizeMultiplier *= (1f + val); break;
+            case SpellStatType.CritChance: spellCritChanceBonus += val; break;
+            case SpellStatType.CritDamage: spellCritDamageMultiplier *= (1f + val); break;
+            case SpellStatType.AttackSpeed: spellAttackSpeedMultiplier *= (1f + val); break;
         }
     }
-
-    // Optional UI helpers
-    public float GetCritChance() => critChance;
-    public float GetCritDamageMultiplier() => critDamageMultiplier;
-    public float GetAoeRadius() => aoeRadius;
-    public int GetProjectileCount() => projectileCount;
 }
