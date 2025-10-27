@@ -17,7 +17,7 @@ public class SpellFrozenOrb : BaseProjectileSpell
             return;
         }
 
-        var effective = CalculateEffectiveStats(stats);
+        SpellRuntimeStats effective = CalculateEffectiveStats(stats);
 
         GameObject orb = CreateProjectile(caster, targetPosition);
         FrozenOrbBehavior behavior = orb.AddComponent<FrozenOrbBehavior>();
@@ -25,7 +25,7 @@ public class SpellFrozenOrb : BaseProjectileSpell
         behavior.Initialize(
             targetPosition,
             effective.projectileSpeed,
-            lifetime,
+            effective.lifetime,
             effective.damage,
             slowChance,
             slowAmount,
@@ -35,6 +35,7 @@ public class SpellFrozenOrb : BaseProjectileSpell
             effective.critDamage
         );
     }
+
 
     public override List<SpellStatType> GetUpgradeableStats() =>
         new List<SpellStatType> {
@@ -60,13 +61,15 @@ public class SpellFrozenOrb : BaseProjectileSpell
 
     public override void ApplyStatUpgrade(SpellStatType statType, float val, int flat = 0)
     {
+        Debug.Log($"Upgrading {SpellName} on {gameObject.GetInstanceID()} to damageMult {upgradeDamageMult}");
+
         switch (statType)
         {
-            case SpellStatType.Damage: spellDamageMultiplier *= (1f + val); break;
-            case SpellStatType.Size: spellSizeMultiplier *= (1f + val); break;
-            case SpellStatType.CritChance: spellCritChanceBonus += val; break;
-            case SpellStatType.CritDamage: spellCritDamageMultiplier *= (1f + val); break;
-            case SpellStatType.AttackSpeed: spellAttackSpeedMultiplier *= (1f + val); break;
+            case SpellStatType.Damage: upgradeDamageMult *= (1f + val); break;
+            case SpellStatType.Size: upgradeSizeMult *= (1f + val); break;
+            case SpellStatType.CritChance: upgradeCritChanceBonus += val; break;
+            case SpellStatType.CritDamage: upgradeCritDamageMult *= (1f + val); break;
+            case SpellStatType.AttackSpeed: upgradeAttackSpeedMult *= (1f + val); break;
         }
     }
 }

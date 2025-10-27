@@ -10,6 +10,8 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float baseLifeSteal = 0f;
     [SerializeField] private float baseArmor = 0f;
     [SerializeField] private float baseDodgeChance = 0f;
+    [SerializeField] private float baseSizeMultiplier = 1f;
+
 
     [Header("Movement Stats")]
     [SerializeField] private float baseMoveSpeed = 5f;
@@ -22,7 +24,7 @@ public class PlayerStats : MonoBehaviour
 
     private float critChanceModifier = 0f;
     private float critDamageModifier = 1f;
-
+    private float sizeMultiplier = 1f;
     public float CurrentCritChance { get; private set; }
     public float CurrentCritDamage { get; private set; }
 
@@ -45,6 +47,8 @@ public class PlayerStats : MonoBehaviour
     public float CurrentXPMultiplier { get; private set; }
     public float CurrentGoldMultiplier { get; private set; }
     public float CurrentSilverMultiplier { get; private set; }
+
+    public float CurrentSizeMultiplier { get; private set; }
 
     // Events for UI updates when stats change
     public event Action OnStatsChanged;
@@ -82,7 +86,7 @@ public class PlayerStats : MonoBehaviour
         CurrentXPMultiplier = baseXPMultiplier * xpMultiplierModifier;
         CurrentGoldMultiplier = baseGoldMultiplier * goldMultiplierModifier;
         CurrentSilverMultiplier = baseSilverMultiplier * silverMultiplierModifier;
-
+        CurrentSizeMultiplier = baseSizeMultiplier * sizeMultiplier;
         // Notify listeners that stats have changed
         OnStatsChanged?.Invoke();
     }
@@ -173,6 +177,7 @@ public class PlayerStats : MonoBehaviour
     // Getters (used by BaseProjectileSpell)
     public float GetCritChance() => CurrentCritChance;
     public float GetCritDamage() => CurrentCritDamage;
+    public float GetSizeMultiplier() => CurrentSizeMultiplier;
 
     // ===== GETTER METHODS FOR OTHER SCRIPTS =====
 

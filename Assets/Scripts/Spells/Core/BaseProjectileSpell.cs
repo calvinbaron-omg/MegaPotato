@@ -10,16 +10,23 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     [SerializeField] protected string description = "No description.";
     [SerializeField] protected Sprite icon;
 
-    [Header("Base Stats")]
+   [Header("Base Spell Stats")]
     [SerializeField] protected float baseDamage = 10f;
+    [SerializeField] protected float baseAttackSpeed = 1f;
     [SerializeField] protected float baseCritChance = 0f;
-    [SerializeField] protected float baseCritDamage = 1.5f;   // 150%
-    [SerializeField] protected float baseSize = 4f;
-    [SerializeField] protected float baseAttackSpeed = 1f;    // affects cooldown & projectile speed
-    [SerializeField] protected float baseAOE = 1f;            // internal AoE multiplier (not upgradeable)
-    [SerializeField] protected float lifetime = 3f;
-    [SerializeField] protected float baseProjectileSpeed = 8f; 
-    [SerializeField] protected float baseRange = 8f; 
+    [SerializeField] protected float baseCritDamage = 1.5f;
+    [SerializeField] protected float baseSize = 1f;
+    [SerializeField] protected float baseAOE = 1f;
+    [SerializeField] protected float baseLifetime = 3f;
+    [SerializeField] protected float baseProjectileSpeed = 8f;
+    [SerializeField] protected float baseRange = 8f;
+
+    [Header("Spell Upgrades")]
+    [SerializeField] protected float upgradeDamageMult = 1f;
+    [SerializeField] protected float upgradeAttackSpeedMult = 1f;
+    [SerializeField] protected float upgradeCritChanceBonus = 0f;
+    [SerializeField] protected float upgradeCritDamageMult = 1f;
+    [SerializeField] protected float upgradeSizeMult = 1f;
 
     [Header("Progression")]
     [SerializeField] protected int spellLevel = 1;
@@ -31,11 +38,11 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     // =======================================================
     // LOCAL UPGRADE MULTIPLIERS (reset each run)
     // =======================================================
-    protected float spellDamageMultiplier = 1f;
-    protected float spellAttackSpeedMultiplier = 1f;
-    protected float spellCritChanceBonus = 0f;
-    protected float spellCritDamageMultiplier = 1f;
-    protected float spellSizeMultiplier = 1f;
+    // protected float spellDamageMultiplier = 1f;
+    // protected float spellAttackSpeedMultiplier = 1f;
+    // protected float spellCritChanceBonus = 0f;
+    // protected float spellCritDamageMultiplier = 1f;
+    // protected float spellSizeMultiplier = 1f;
 
     // =======================================================
     // DEFAULT SNAPSHOT (for per-run reset)
@@ -68,7 +75,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     public int MaxLevel => maxLevel;
 
     public float GetActualCooldown(float globalAttackSpeed) => 1f / (baseAttackSpeed * globalAttackSpeed);
-    public float GetActualRange(float globalRangeBonus) => baseRange * spellSizeMultiplier + globalRangeBonus;
+    public float GetActualRange(float globalRangeBonus) => baseRange * upgradeSizeMult + globalRangeBonus;
 
     // =======================================================
     // INITIALIZATION
@@ -97,14 +104,15 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     // =======================================================
     public virtual void ResetToBaseStats()
     {
+        
         // 🔹 Reset only runtime-modified fields
         spellLevel = 1;
 
-        spellDamageMultiplier = 1f;
-        spellAttackSpeedMultiplier = 1f;
-        spellCritChanceBonus = 0f;
-        spellCritDamageMultiplier = 1f;
-        spellSizeMultiplier = 1f;
+        upgradeDamageMult = 1f;
+        upgradeAttackSpeedMult = 1f;
+        upgradeCritChanceBonus = 0f;
+        upgradeCritDamageMult = 1f;
+        upgradeSizeMult = 1f;
     }
 
 
@@ -193,21 +201,42 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     // =======================================================
     // COMBINED STAT CALCULATION
     // =======================================================
-    protected virtual (float damage, float critChance, float critDamage, float attackSpeed, float size, float aoe, float projectileSpeed)
-        CalculateEffectiveStats(PlayerStats stats)
+    protected virtual SpellRuntimeStats CalculateEffectiveStats(PlayerStats player)
     {
-        float finalDamage = baseDamage * spellDamageMultiplier * stats.GetDamagePercent();;
-        float finalCritChance = baseCritChance + spellCritChanceBonus + stats.GetCritChance();
-        float finalCritDamage = baseCritDamage * spellCritDamageMultiplier * stats.GetCritDamage();
-        float finalAttackSpeed = baseAttackSpeed * spellAttackSpeedMultiplier * stats.GetAttackSpeed();
-        float finalSize = baseSize * spellSizeMultiplier;
+        // 1. Combine base stats with spell's own upgrade multipliers
+        float upgradedDamage        = baseDamage * upgradeDamageMult;
+        float upgradedAttackSpeed   = baseAttackSpeed * upgradeAttackSpeedMult;
+        float upgradedCritChance    = baseCritChance + upgradeCritChanceBonus;
+        float upgradedCritDamage    = baseCritDamage * upgradeCritDamageMult;
+        float upgradedSize          = baseSize * upgradeSizeMult;
+
+        // 2. Apply player global modifiers (from PlayerStats)
+        float finalDamage = upgradedDamage * player.GetDamagePercent();
+        float finalAttackSpeed = upgradedAttackSpeed * player.GetAttackSpeed();
+        float finalCritChance = upgradedCritChance + player.GetCritChance();
+        float finalCritDamage = upgradedCritDamage * player.GetCritDamage();
+        float finalSize = upgradedSize * player.GetSizeMultiplier();
+
+        // 3. Derived stats
         float finalAOE = baseAOE * finalSize;
+        float finalProjectileSpeed = baseProjectileSpeed * finalAttackSpeed;
+        float finalRange = baseRange * finalSize;
+        float finalLifetime = baseLifetime; // lifetime never scales
 
-        // ✅ new: projectile speed scales with player attack speed
-        float finalProjectileSpeed = baseProjectileSpeed * stats.GetAttackSpeed();
-
-        return (finalDamage, finalCritChance, finalCritDamage, finalAttackSpeed, finalSize, finalAOE, finalProjectileSpeed);
+        return new SpellRuntimeStats(
+            damage: finalDamage,
+            attackSpeed: finalAttackSpeed,
+            critChance: finalCritChance,
+            critDamage: finalCritDamage,
+            size: finalSize,
+            aoe: finalAOE,
+            projectileSpeed: finalProjectileSpeed,
+            range: finalRange,
+            lifetime: finalLifetime
+        );
     }
+
+
 
 
     // =======================================================

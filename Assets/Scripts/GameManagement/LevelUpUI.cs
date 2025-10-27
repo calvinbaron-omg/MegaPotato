@@ -108,7 +108,7 @@ public class LevelUpUI : MonoBehaviour
             Destroy(child.gameObject);
     }
 
-    public void OnSpellSelected(LevelUpChoiceType type, GameObject newSpellPrefab = null, BaseProjectileSpell upgradeTarget = null, RolledUpgradeChoice? selectedUpgrade = null)
+    public void OnSpellSelected(LevelUpChoiceType type, GameObject newSpellPrefab = null, BaseProjectileSpell upgradeTarget = null, List<RolledUpgradeChoice> selectedUpgrades = null)
     {
         if (playerAutoAttack == null)
         {
@@ -130,13 +130,35 @@ public class LevelUpUI : MonoBehaviour
             }
         }
 
-        // UPGRADE SELECTION
-        else if (type == LevelUpChoiceType.Upgrade && upgradeTarget != null && selectedUpgrade.HasValue)
+        // UPGRADE SELECTION with Multiple Upgrades
+        else if (type == LevelUpChoiceType.Upgrade && upgradeTarget != null && selectedUpgrades != null && selectedUpgrades.Count > 0)
         {
-            RolledUpgradeChoice choice = selectedUpgrade.Value;
-            upgradeTarget.ApplyUpgradeAndLevel(choice.statType, choice.rarity);
-            Debug.Log($"Upgraded {upgradeTarget.SpellName} ({choice.rarity}) with {choice.uiText}");
+            // Find the active instance of this spell on the player
+            BaseProjectileSpell activeInstance = null;
+            foreach (ISpell spell in playerAutoAttack.GetEquippedSpells())
+            {
+                if (spell is BaseProjectileSpell instance && instance.SpellName == upgradeTarget.SpellName)
+                {
+                    activeInstance = instance;
+                    break;
+                }
+            }
+
+            if (activeInstance != null)
+            {
+                foreach (var upgrade in selectedUpgrades)
+                {
+                    activeInstance.ApplyUpgradeAndLevel(upgrade.statType, upgrade.rarity);
+                    Debug.Log($"Applied {upgrade.uiText} ({upgrade.rarity}) to {activeInstance.SpellName}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"No active instance found for {upgradeTarget.SpellName}");
+            }
         }
+
+
 
         ResumeGame();
     }

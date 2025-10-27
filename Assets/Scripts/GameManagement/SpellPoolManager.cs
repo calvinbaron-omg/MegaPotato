@@ -188,6 +188,7 @@ public class SpellPoolManager : MonoBehaviour
         foreach (GameObject spellPrefab in allSpellPrefabs)
         {
             if (spellPrefab == null) continue;
+            Debug.Log($"Resetting {spellPrefab.name} on {spellPrefab.GetInstanceID()}");
 
             BaseProjectileSpell spell = spellPrefab.GetComponent<BaseProjectileSpell>();
             if (spell != null)
