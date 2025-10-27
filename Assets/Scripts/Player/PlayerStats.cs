@@ -7,7 +7,7 @@ public class PlayerStats : MonoBehaviour
 {
     [Header("Combat Stats")]
     [SerializeField] private float baseAttackSpeed = 1.0f;
-    [SerializeField] private float baseDamage = 25f;
+    [SerializeField] private float baseDamage = 25f; // base damage is wrong here. get rid of it.
     [SerializeField] private float baseLifeSteal = 0f;
     [SerializeField] private float baseArmor = 0f;
     [SerializeField] private float baseDodgeChance = 0f;
@@ -181,7 +181,7 @@ public class PlayerStats : MonoBehaviour
     public float GetGoldMultiplier() => CurrentGoldMultiplier;
     public float GetSilverMultiplier() => CurrentSilverMultiplier;
     public float GetAttackSpeed() => CurrentAttackSpeed;
-    public float GetDamage() => CurrentDamage;
+    public float GetDamage() => CurrentDamage / 100; //Dividing by 100 because base current damage is a percent
     public float GetLifeSteal() => CurrentLifeSteal;
     public float GetArmor() => CurrentArmor;
     public float GetDodgeChance() => CurrentDodgeChance;

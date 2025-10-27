@@ -199,6 +199,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         CalculateEffectiveStats(PlayerStats stats)
     {
         float finalDamage = baseDamage * spellDamageMultiplier * stats.GetDamage();
+        float totalMulitiplier = spellDamageMultiplier + (stats.GetDamage() / 100);
+        float testDamage = baseDamage * totalMulitiplier;
         float finalCritChance = baseCritChance + spellCritChanceBonus + stats.GetCritChance();
         float finalCritDamage = baseCritDamage * spellCritDamageMultiplier * stats.GetCritDamage();
         float finalAttackSpeed = baseAttackSpeed * spellAttackSpeedMultiplier * stats.GetAttackSpeed();
