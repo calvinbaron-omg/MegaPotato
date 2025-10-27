@@ -80,7 +80,8 @@ public class FrozenOrbBehavior : MonoBehaviour
                 // TODO: spawn crit VFX / popup text etc.
             }
 
-            health.TakeDamage(damageToApply);
+            health.TakeDamage(damageToApply, isCrit);
+            
 
             // slow roll
             if (Random.value <= slowChance)

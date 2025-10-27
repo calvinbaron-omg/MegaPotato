@@ -40,12 +40,12 @@ public class PlayerHealth : Health
         }
     }
 
-    public override void TakeDamage(float amount)
+    public override void TakeDamage(float amount, bool isCrit = false)
     {
         // Ignore damage if currently invincible
         if (isInvincible) return;
         
-        base.TakeDamage(amount);
+        base.TakeDamage(amount, isCrit);
         
         // Start invincibility if damage was taken and player is still alive
         if (amount > 0 && currentHealth > 0)

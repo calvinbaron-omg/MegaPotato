@@ -79,7 +79,7 @@ public class BallLightningBehavior : MonoBehaviour
             if (isCrit)
                 damage *= critDamageMultiplier;
 
-            health.TakeDamage(damage);
+            health.TakeDamage(damage, isCrit);
 
             // Shock (stun/slow) roll
             if (Random.value <= shockChance)

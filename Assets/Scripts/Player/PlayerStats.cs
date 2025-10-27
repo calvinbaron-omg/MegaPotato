@@ -7,7 +7,6 @@ public class PlayerStats : MonoBehaviour
 {
     [Header("Combat Stats")]
     [SerializeField] private float baseAttackSpeed = 1.0f;
-    [SerializeField] private float baseDamage = 25f; // base damage is wrong here. get rid of it.
     [SerializeField] private float baseLifeSteal = 0f;
     [SerializeField] private float baseArmor = 0f;
     [SerializeField] private float baseDodgeChance = 0f;
@@ -35,7 +34,7 @@ public class PlayerStats : MonoBehaviour
 
     [Header("Current Stats (Read Only)")]
     public float CurrentAttackSpeed { get; private set; }
-    public float CurrentDamage { get; private set; }
+    public float CurrentDamagePercent { get; private set; }
     public float CurrentLifeSteal { get; private set; }
     public float CurrentArmor { get; private set; }
     public float CurrentDodgeChance { get; private set; }
@@ -52,7 +51,7 @@ public class PlayerStats : MonoBehaviour
 
     // Modifier tracking
     private float attackSpeedModifier = 1.0f;
-    private float damageModifier = 1.0f;
+    private float damageModifierPercent = 1.0f; //1.0f will be no increase. 1.1 will be 10%
     private float moveSpeedModifier = 1.0f;
     private float jumpHeightModifier = 1.0f;
     private float collectionRadiusModifier = 1.0f;
@@ -69,14 +68,15 @@ public class PlayerStats : MonoBehaviour
     {
         // Calculate final stats with all modifiers
         CurrentAttackSpeed = baseAttackSpeed * attackSpeedModifier;
-        CurrentDamage = baseDamage * damageModifier;
+        CurrentDamagePercent =  damageModifierPercent;
         CurrentLifeSteal = baseLifeSteal;
         CurrentArmor = baseArmor;
         CurrentDodgeChance = baseDodgeChance;
         CurrentMoveSpeed = baseMoveSpeed * moveSpeedModifier;
         CurrentJumpHeight = baseJumpHeight * jumpHeightModifier;
         CurrentMaxJumps = baseMaxJumps;
-        
+        CurrentCritChance = baseCritChance * critChanceModifier;
+        CurrentCritDamage = baseCritDamage * critDamageModifier;
         // New collection multipliers
         CurrentCollectionRadiusMultiplier = baseCollectionRadius * collectionRadiusModifier;
         CurrentXPMultiplier = baseXPMultiplier * xpMultiplierModifier;
@@ -119,7 +119,7 @@ public class PlayerStats : MonoBehaviour
 
     public void AddDamage(float multiplier)
     {
-        damageModifier += multiplier;
+        damageModifierPercent += multiplier;
         CalculateFinalStats();
     }
 
@@ -181,7 +181,7 @@ public class PlayerStats : MonoBehaviour
     public float GetGoldMultiplier() => CurrentGoldMultiplier;
     public float GetSilverMultiplier() => CurrentSilverMultiplier;
     public float GetAttackSpeed() => CurrentAttackSpeed;
-    public float GetDamage() => CurrentDamage / 100; //Dividing by 100 because base current damage is a percent
+    public float GetDamagePercent() => CurrentDamagePercent;
     public float GetLifeSteal() => CurrentLifeSteal;
     public float GetArmor() => CurrentArmor;
     public float GetDodgeChance() => CurrentDodgeChance;
@@ -238,7 +238,7 @@ public class PlayerStats : MonoBehaviour
     critChanceModifier = 0f;
     critDamageModifier = 1f;
     attackSpeedModifier = 1f;
-    damageModifier = 1f;
+    damageModifierPercent = 1f;
     moveSpeedModifier = 1f;
     jumpHeightModifier = 1f;
     collectionRadiusModifier = 1f;
