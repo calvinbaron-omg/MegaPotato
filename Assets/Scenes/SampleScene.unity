@@ -634,8 +634,8 @@ MonoBehaviour:
   minDistanceFromPlayer: 10
   spawnRangeX: 20
   spawnRangeZ: 20
-  spawnInterval: 5
-  startDelay: 2
+  spawnInterval: 2
+  startDelay: 0
   enemiesPerSpawn: 2
 --- !u!1 &243928867
 GameObject:
@@ -2503,6 +2503,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1822012150}
   - component: {fileID: 1822012149}
+  - component: {fileID: 1822012151}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2538,6 +2539,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1822012151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1822012148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b983a31b86927c4daecb4b4b554142d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FloatingDamageTextManager
+  floatingTextPrefab: {fileID: 5863298634764333681, guid: dd421c13ed07cd14999a5f3fb71a50c0, type: 3}
 --- !u!1 &1847959480
 GameObject:
   m_ObjectHideFlags: 0
@@ -2818,7 +2832,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   baseAttackSpeed: 1
-  baseDamage: 25
   baseLifeSteal: 0
   baseArmor: 0
   baseDodgeChance: 0
