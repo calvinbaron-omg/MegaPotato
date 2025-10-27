@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using Mono.Cecil.Cil;
 
 public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
 {
@@ -95,20 +97,16 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     // =======================================================
     public virtual void ResetToBaseStats()
     {
-        baseDamage = snapshot.baseDamage;
-        baseCritChance = snapshot.baseCritChance;
-        baseCritDamage = snapshot.baseCritDamage;
-        baseSize = snapshot.baseSize;
-        baseAttackSpeed = snapshot.baseAttackSpeed;
-        baseAOE = snapshot.baseAOE;
-        spellLevel = snapshot.spellLevel;
-        baseRange = snapshot.baseRange;
+        // 🔹 Reset only runtime-modified fields
+        spellLevel = 1;
+
         spellDamageMultiplier = 1f;
         spellAttackSpeedMultiplier = 1f;
         spellCritChanceBonus = 0f;
         spellCritDamageMultiplier = 1f;
         spellSizeMultiplier = 1f;
     }
+
 
     // =======================================================
     // LEVELING / UPGRADES
@@ -198,9 +196,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     protected virtual (float damage, float critChance, float critDamage, float attackSpeed, float size, float aoe, float projectileSpeed)
         CalculateEffectiveStats(PlayerStats stats)
     {
-        float finalDamage = baseDamage * spellDamageMultiplier * stats.GetDamage();
-        float totalMulitiplier = spellDamageMultiplier + (stats.GetDamage() / 100);
-        float testDamage = baseDamage * totalMulitiplier;
+        float finalDamage = baseDamage * spellDamageMultiplier * stats.GetDamagePercent();;
         float finalCritChance = baseCritChance + spellCritChanceBonus + stats.GetCritChance();
         float finalCritDamage = baseCritDamage * spellCritDamageMultiplier * stats.GetCritDamage();
         float finalAttackSpeed = baseAttackSpeed * spellAttackSpeedMultiplier * stats.GetAttackSpeed();

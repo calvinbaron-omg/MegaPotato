@@ -15,21 +15,32 @@ public class Health : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    public virtual void TakeDamage(float amount)
+   public virtual void TakeDamage(float amount, bool isCrit = false)
     {
-        // Reduce health and clamp between 0 and max
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-        
-        // Trigger damage event for visual/audio effects
         onDamageTaken.Invoke();
 
-        // Check for death
-        if (currentHealth <= 0)
+        // Pick a point roughly at the top of the collider, or fallback to +1.5f
+        Vector3 spawnPos = transform.position;
+
+        Collider col = GetComponent<Collider>();
+        if (col != null)
         {
-            Die();
+            spawnPos = col.bounds.center + Vector3.up * col.bounds.extents.y * -1f;
         }
+        else
+        {
+            spawnPos += Vector3.up * 1.5f;
+        }
+
+        FloatingDamageTextManager.Instance.Spawn(spawnPos, amount, isCrit);
+
+
+        if (currentHealth <= 0)
+            Die();
     }
+
 
     private void Die()
     {

@@ -159,10 +159,11 @@ MonoBehaviour:
   baseCritChance: 0
   baseCritDamage: 1.5
   baseSize: 4
-  baseAttackSpeed: 4
+  baseAttackSpeed: 1
   baseAOE: 1
   lifetime: 3
   baseProjectileSpeed: 10
+  baseRange: 8
   spellLevel: 1
   maxLevel: 50
   spellProjectilePrefab: {fileID: 3854896913943547373}

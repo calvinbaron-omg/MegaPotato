@@ -156,15 +156,15 @@ MonoBehaviour:
   description: A frozen orb spell
   icon: {fileID: 0}
   baseDamage: 25
-  baseCritChance: 0
-  baseCritDamage: 1.5
-  baseSize: 1
-  baseAttackSpeed: 0.25
-  baseAOE: 1
+  baseCritChance: 0.5
+  baseCritDamage: 1
+  baseSize: 4
+  baseAttackSpeed: 0.5
+  baseAOE: 2
   lifetime: 3
   baseProjectileSpeed: 8
-  baseRange: 30
-  spellLevel: 1
+  baseRange: 8
+  spellLevel: 0
   maxLevel: 50
   spellProjectilePrefab: {fileID: 3854896913943547373}
   slowChance: 0.3

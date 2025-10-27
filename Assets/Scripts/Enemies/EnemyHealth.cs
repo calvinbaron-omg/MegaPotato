@@ -10,9 +10,9 @@ public class EnemyHealth : Health
         pickupDrop = GetComponent<PickupDrop>(); 
     }
 
-    public override void TakeDamage(float amount)
+    public override void TakeDamage(float amount, bool isCrit = false)
     {
-        base.TakeDamage(amount);
+        base.TakeDamage(amount, isCrit);
     }
 
     protected override void HandleDeath()

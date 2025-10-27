@@ -79,7 +79,7 @@ public class FireballBehavior : MonoBehaviour
             if (isCrit)
                 damage *= critDamageMultiplier;
 
-            health.TakeDamage(damage);
+            health.TakeDamage(damage, isCrit);
 
             // Burn roll
             if (Random.value <= burnChance)

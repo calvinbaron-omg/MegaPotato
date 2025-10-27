@@ -60,6 +60,9 @@ public class GameManager : MonoBehaviour
             scoreManager.ResetTimer();
         }
 
+        SpellPoolManager pool = FindAnyObjectByType<SpellPoolManager>();
+        pool?.ResetAllSpellsToBase();
+
         // Reload current scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
@@ -73,6 +76,8 @@ public class GameManager : MonoBehaviour
     // Optional method to explicitly start a new run
     public void StartNewRun()
     {
+        FloatingDamageTextManager.Instance.Spawn(new Vector3(0, 2, 0), 123, false);
+
         PlayerCurrency playerCurrency = FindAnyObjectByType<PlayerCurrency>();
         if (playerCurrency != null)
         {
@@ -84,9 +89,12 @@ public class GameManager : MonoBehaviour
 
         // Other run start logic can go here
         Time.timeScale = 1;
-        
+
         if (gameOverText != null)
             gameOverText.gameObject.SetActive(false);
+
+        SpellPoolManager pool = FindAnyObjectByType<SpellPoolManager>();
+        pool?.ResetAllSpellsToBase();
 
         ScoreManager scoreManager = FindAnyObjectByType<ScoreManager>();
         if (scoreManager != null)
