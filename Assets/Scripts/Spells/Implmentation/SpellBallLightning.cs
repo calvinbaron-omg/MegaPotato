@@ -17,7 +17,7 @@ public class SpellBallLightning : BaseProjectileSpell
             return;
         }
 
-        var effective = CalculateEffectiveStats(stats);
+        SpellRuntimeStats effective = CalculateEffectiveStats(stats);
 
         GameObject lightning = CreateProjectile(caster, targetPosition);
         BallLightningBehavior behavior = lightning.AddComponent<BallLightningBehavior>();
@@ -25,7 +25,7 @@ public class SpellBallLightning : BaseProjectileSpell
         behavior.Initialize(
             targetPosition,
             effective.projectileSpeed,
-            lifetime,
+            effective.lifetime,
             effective.damage,
             shockChance,
             shockAmount,
@@ -35,6 +35,7 @@ public class SpellBallLightning : BaseProjectileSpell
             effective.critDamage
         );
     }
+
 
     public override List<SpellStatType> GetUpgradeableStats() =>
         new List<SpellStatType> {
@@ -62,11 +63,11 @@ public class SpellBallLightning : BaseProjectileSpell
     {
         switch (statType)
         {
-            case SpellStatType.Damage: spellDamageMultiplier *= (1f + val); break;
-            case SpellStatType.Size: spellSizeMultiplier *= (1f + val); break;
-            case SpellStatType.CritChance: spellCritChanceBonus += val; break;
-            case SpellStatType.CritDamage: spellCritDamageMultiplier *= (1f + val); break;
-            case SpellStatType.AttackSpeed: spellAttackSpeedMultiplier *= (1f + val); break;
+            case SpellStatType.Damage: upgradeDamageMult *= (1f + val); break;
+            case SpellStatType.Size: upgradeSizeMult *= (1f + val); break;
+            case SpellStatType.CritChance: upgradeCritChanceBonus += val; break;
+            case SpellStatType.CritDamage: upgradeCritDamageMult *= (1f + val); break;
+            case SpellStatType.AttackSpeed: upgradeAttackSpeedMult *= (1f + val); break;
         }
     }
 }

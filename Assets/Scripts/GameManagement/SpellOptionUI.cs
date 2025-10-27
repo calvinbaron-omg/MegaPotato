@@ -24,6 +24,8 @@ public class SpellOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerClickH
     private GameObject spellPrefab;
     private BaseProjectileSpell targetSpell;
     private RolledUpgradeChoice? selectedUpgrade;
+    private List<RolledUpgradeChoice> rolledUpgrades;
+
     private bool isSelected = false;
 
     public void InitializeNewSpell(GameObject prefab, LevelUpUI ui)
@@ -42,17 +44,14 @@ public class SpellOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerClickH
         levelUpUI = ui;
         choiceType = LevelUpChoiceType.Upgrade;
         targetSpell = spell;
+        this.rolledUpgrades = rolledUpgrades; // ✅ keep full list
 
-        if (rolledUpgrades != null && rolledUpgrades.Count > 0)
-        {
-            // Pick one random upgrade to apply when selected
-            selectedUpgrade = rolledUpgrades[Random.Range(0, rolledUpgrades.Count)];
-            UpdateUpgradeUI(rolledUpgrades);
-        }
+        UpdateUpgradeUI(rolledUpgrades);
 
         if (selectButton != null)
             selectButton.onClick.AddListener(OnSelectButtonClicked);
     }
+
 
     private void UpdateNewSpellUI()
     {
@@ -105,8 +104,8 @@ public class SpellOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerClickH
     {
         if (isSelected) return;
         isSelected = true;
-
-        levelUpUI.OnSpellSelected(choiceType, spellPrefab, targetSpell, selectedUpgrade);
+        levelUpUI.OnSpellSelected(choiceType, spellPrefab, targetSpell, rolledUpgrades);
+        //levelUpUI.OnSpellSelected(choiceType, spellPrefab, targetSpell, selectedUpgrade);
     }
 
     public void SelectOption()

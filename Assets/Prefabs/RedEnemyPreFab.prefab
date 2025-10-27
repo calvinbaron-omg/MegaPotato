@@ -205,7 +205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PickupDrop
   dropChances:
   - pickupType: 0
-    dropChance: 100
+    dropChance: 500
   - pickupType: 2
     dropChance: 50
   - pickupType: 3
