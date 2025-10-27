@@ -3,6 +3,8 @@ using UnityEngine;
 public class EnemySpawner : MonoBehaviour
 {
     public GameObject[] enemyPrefabs;  // Assign all enemy prefabs here
+
+    public GameObject[] eliteEnemyPrefabs;
     public Transform player;
 
     [Header("Spawn Settings")]
@@ -16,6 +18,8 @@ public class EnemySpawner : MonoBehaviour
     public int enemiesPerSpawn = 2;     // How many enemies to spawn each interval
 
     private float spawnTimer = 0f;
+
+    private int normalEnemiesSpawnCounter = 0;
 
     void Start()
     {
@@ -58,5 +62,13 @@ public class EnemySpawner : MonoBehaviour
         // Spawn random enemy from available prefabs
         GameObject enemyToSpawn = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
         Instantiate(enemyToSpawn, spawnPos, Quaternion.identity);
+        normalEnemiesSpawnCounter += 1;
+        
+        if (normalEnemiesSpawnCounter >= 10)
+        {
+            GameObject eliteEnemyToSpawn = eliteEnemyPrefabs[Random.Range(0, eliteEnemyPrefabs.Length)];
+            Instantiate(eliteEnemyToSpawn, spawnPos, Quaternion.identity);
+            normalEnemiesSpawnCounter = 0;
+        }
     }
 }
