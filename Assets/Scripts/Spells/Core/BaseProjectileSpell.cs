@@ -132,22 +132,26 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     public virtual (bool isFlat, int flatAmount) GetFlatUpgradeInfo(SpellStatType statType) => (false, 0);
     public abstract void ApplyStatUpgrade(SpellStatType statType, float effectiveValue, int flatAmountIfAny = 0);
 
-    public void ApplyUpgradeAndLevel(SpellStatType statType, Rarity rarity)
+    public void ApplyUpgradeAndLevel(List<RolledUpgradeChoice> selectedUpgrades)
     {
-        float baseVal = GetBaseUpgradeValue(statType);
-        (bool isFlat, int flatAmt) = GetFlatUpgradeInfo(statType);
-
-        if (isFlat)
+        
+        foreach (var upgrade in selectedUpgrades)
         {
-            int scaledFlat = Mathf.RoundToInt(flatAmt * RarityHelper.GetMultiplier(rarity));
-            ApplyStatUpgrade(statType, 0f, scaledFlat);
-        }
-        else
-        {
-            float scaledVal = baseVal * RarityHelper.GetMultiplier(rarity);
-            ApplyStatUpgrade(statType, scaledVal, 0);
-        }
-
+            float baseVal = GetBaseUpgradeValue(upgrade.statType);
+            (bool isFlat, int flatAmt) = GetFlatUpgradeInfo(upgrade.statType);
+            if (isFlat)
+            {
+                int scaledFlat = Mathf.RoundToInt(flatAmt * RarityHelper.GetMultiplier(upgrade.rarity));
+                ApplyStatUpgrade(upgrade.statType, 0f, scaledFlat);
+            }
+            else
+            {
+                float scaledVal = baseVal * RarityHelper.GetMultiplier(upgrade.rarity);
+                ApplyStatUpgrade(upgrade.statType, scaledVal, 0);
+            }
+        
+            Debug.Log($"Applied {upgrade.uiText} ({upgrade.rarity}) to {SpellName}");
+        }  
         LevelUp();
     }
 
