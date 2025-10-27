@@ -6,6 +6,7 @@ using System.Collections;
 public class PlayerStats : MonoBehaviour
 {
     [Header("Combat Stats")]
+    //TODO: This is not attack speed, this is projectile speed
     [SerializeField] private float baseAttackSpeed = 1.0f;
     [SerializeField] private float baseLifeSteal = 0f;
     [SerializeField] private float baseArmor = 0f;
