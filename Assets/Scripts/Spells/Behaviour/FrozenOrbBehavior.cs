@@ -10,8 +10,21 @@ public class FrozenOrbBehavior : MonoBehaviour
     private float slowAmount;
     private float slowDuration;
     private float aoeRadius;
+    private float critChance;
+    private float critDamageMultiplier;
 
-    public void Initialize(Vector3 targetPos, float spd, float life, float baseDmg, float slowCh, float slowAmt, float slowDur, float aoeRad)
+    public void Initialize(
+        Vector3 targetPos,
+        float spd,
+        float life,
+        float baseDmg,
+        float slowCh,
+        float slowAmt,
+        float slowDur,
+        float aoeRad,
+        float critCh,
+        float critMult
+    )
     {
         targetPosition = targetPos;
         speed = spd;
@@ -21,7 +34,9 @@ public class FrozenOrbBehavior : MonoBehaviour
         slowAmount = slowAmt;
         slowDuration = slowDur;
         aoeRadius = aoeRad;
-        
+        critChance = critCh;
+        critDamageMultiplier = critMult;
+
         Destroy(gameObject, lifetime);
     }
 
@@ -51,20 +66,26 @@ public class FrozenOrbBehavior : MonoBehaviour
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, aoeRadius);
         foreach (Collider enemy in hitEnemies)
         {
-            if (enemy.CompareTag("Enemy"))
+            if (!enemy.CompareTag("Enemy")) continue;
+            
+            Health health = enemy.GetComponent<Health>();
+            if (health == null) continue;
+
+            // crit roll
+            float damageToApply = baseDamage;
+            bool isCrit = Random.value < critChance;
+            if (isCrit)
             {
-                Health health = enemy.GetComponent<Health>();
-                if (health != null)
-                {
-                    // Apply base damage
-                    health.TakeDamage(baseDamage);
-                    
-                    // Apply slow effect
-                    if (Random.value <= slowChance)
-                    {
-                        ApplySlow(enemy.gameObject);
-                    }
-                }
+                damageToApply *= critDamageMultiplier;
+                // TODO: spawn crit VFX / popup text etc.
+            }
+
+            health.TakeDamage(damageToApply);
+
+            // slow roll
+            if (Random.value <= slowChance)
+            {
+                ApplySlow(enemy.gameObject);
             }
         }
     }

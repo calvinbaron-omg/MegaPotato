@@ -7,7 +7,7 @@ public class PlayerStats : MonoBehaviour
 {
     [Header("Combat Stats")]
     [SerializeField] private float baseAttackSpeed = 1.0f;
-    [SerializeField] private float baseDamage = 25f;
+    [SerializeField] private float baseDamage = 25f; // base damage is wrong here. get rid of it.
     [SerializeField] private float baseLifeSteal = 0f;
     [SerializeField] private float baseArmor = 0f;
     [SerializeField] private float baseDodgeChance = 0f;
@@ -16,6 +16,16 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float baseMoveSpeed = 5f;
     [SerializeField] private float baseJumpHeight = 8f;
     [SerializeField] private int baseMaxJumps = 1;
+   
+    [Header("Critical Stats")]
+    [SerializeField] private float baseCritChance = 0f;   // e.g. Rogue might start at 0.05 (5%)
+    [SerializeField] private float baseCritDamage = 1.5f; // 150% default
+
+    private float critChanceModifier = 0f;
+    private float critDamageModifier = 1f;
+
+    public float CurrentCritChance { get; private set; }
+    public float CurrentCritDamage { get; private set; }
 
     [Header("Collection Stats")]
     [SerializeField] private float baseCollectionRadius = 1f; // Multiplier base
@@ -148,6 +158,21 @@ public class PlayerStats : MonoBehaviour
         baseMaxJumps++;
         CalculateFinalStats();
     }
+    public void AddCritChance(float amount)
+    {
+        critChanceModifier += amount;
+        CalculateFinalStats();
+    }
+
+    public void AddCritDamage(float multiplier)
+    {
+        critDamageModifier *= (1f + multiplier);
+        CalculateFinalStats();
+    }
+
+    // Getters (used by BaseProjectileSpell)
+    public float GetCritChance() => CurrentCritChance;
+    public float GetCritDamage() => CurrentCritDamage;
 
     // ===== GETTER METHODS FOR OTHER SCRIPTS =====
 
@@ -156,7 +181,7 @@ public class PlayerStats : MonoBehaviour
     public float GetGoldMultiplier() => CurrentGoldMultiplier;
     public float GetSilverMultiplier() => CurrentSilverMultiplier;
     public float GetAttackSpeed() => CurrentAttackSpeed;
-    public float GetDamage() => CurrentDamage;
+    public float GetDamage() => CurrentDamage / 100; //Dividing by 100 because base current damage is a percent
     public float GetLifeSteal() => CurrentLifeSteal;
     public float GetArmor() => CurrentArmor;
     public float GetDodgeChance() => CurrentDodgeChance;
@@ -207,4 +232,21 @@ public class PlayerStats : MonoBehaviour
         // isShielded = false;
         return null;
     }
+
+    public void ResetToBaseValues()
+{
+    critChanceModifier = 0f;
+    critDamageModifier = 1f;
+    attackSpeedModifier = 1f;
+    damageModifier = 1f;
+    moveSpeedModifier = 1f;
+    jumpHeightModifier = 1f;
+    collectionRadiusModifier = 1f;
+    xpMultiplierModifier = 1f;
+    goldMultiplierModifier = 1f;
+    silverMultiplierModifier = 1f;
+
+    CalculateFinalStats();
+}
+
 }

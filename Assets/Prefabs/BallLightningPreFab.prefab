@@ -156,12 +156,16 @@ MonoBehaviour:
   description: A ball of lightning
   icon: {fileID: 0}
   baseDamage: 25
-  baseCooldown: 1.2
-  baseRange: 8
-  projectileSpeed: 8
+  baseCritChance: 0
+  baseCritDamage: 1.5
+  baseSize: 1
+  baseAttackSpeed: 4
+  baseAOE: 1
   lifetime: 3
-  spellPrefab: {fileID: 3854896913943547373}
-  slowChance: 0.2
-  slowAmount: 1
-  slowDuration: 1
-  aoeRadius: 3
+  baseProjectileSpeed: 12
+  spellLevel: 1
+  maxLevel: 50
+  spellProjectilePrefab: {fileID: 3854896913943547373}
+  shockChance: 0.25
+  shockAmount: 1
+  shockDuration: 1.5

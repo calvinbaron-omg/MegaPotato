@@ -1725,7 +1725,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &793423547
 Transform:
   m_ObjectHideFlags: 0
@@ -2800,7 +2800,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9590929959a715644b9cdeae4ed49ad6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPickupCollector
-  baseCollectionRadius: 3
+  baseCollectionRadius: 20
   baseMoveSpeed: 15
   pickupTag: Pickup
 --- !u!114 &1849746006
@@ -2823,6 +2823,8 @@ MonoBehaviour:
   baseMoveSpeed: 5
   baseJumpHeight: 8
   baseMaxJumps: 1
+  baseCritChance: 0
+  baseCritDamage: 1.5
   baseCollectionRadius: 1
   baseXPMultiplier: 1
   baseGoldMultiplier: 1
@@ -2841,6 +2843,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAutoAttack
   globalAttackSpeed: 1
   globalRangeBonus: 0
+  maxEquippedSpells: 2
   equippedSpells:
   - {fileID: 3854896913943547373, guid: db4b7ede5e8c97746889d7f9b53488da, type: 3}
 --- !u!1 &1896554197

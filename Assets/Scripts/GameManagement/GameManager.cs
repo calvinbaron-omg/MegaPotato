@@ -78,6 +78,9 @@ public class GameManager : MonoBehaviour
         {
             playerCurrency.OnRunStart();
         }
+        PlayerStats stats = FindAnyObjectByType<PlayerStats>();
+        if (stats != null)
+            stats.ResetToBaseValues();
 
         // Other run start logic can go here
         Time.timeScale = 1;
