@@ -146,11 +146,7 @@ public class LevelUpUI : MonoBehaviour
 
             if (activeInstance != null)
             {
-                foreach (var upgrade in selectedUpgrades)
-                {
-                    activeInstance.ApplyUpgradeAndLevel(upgrade.statType, upgrade.rarity);
-                    Debug.Log($"Applied {upgrade.uiText} ({upgrade.rarity}) to {activeInstance.SpellName}");
-                }
+                activeInstance.ApplyUpgradeAndLevel(selectedUpgrades);
             }
             else
             {
