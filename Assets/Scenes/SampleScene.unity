@@ -591,7 +591,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 235874192}
-  - component: {fileID: 235874191}
+  - component: {fileID: 235874193}
   m_Layer: 0
   m_Name: EnemySpawner
   m_TagString: Untagged
@@ -599,27 +599,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &235874191
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 235874190}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a311cb31fff4d304ca18086223cef139, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  enemyPrefabs:
-  - {fileID: 4961392323306338389, guid: bf831fd410051394082bc3777c61b14b, type: 3}
-  player: {fileID: 243928871}
-  minDistanceFromPlayer: 10
-  spawnRangeX: 20
-  spawnRangeZ: 20
-  spawnInterval: 2
-  startDelay: 1
-  enemiesPerSpawn: 2
 --- !u!4 &235874192
 Transform:
   m_ObjectHideFlags: 0
@@ -635,6 +614,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &235874193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235874190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a311cb31fff4d304ca18086223cef139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
+  enemyPrefabs:
+  - {fileID: 4961392323306338389, guid: bf831fd410051394082bc3777c61b14b, type: 3}
+  eliteEnemyPrefabs:
+  - {fileID: 99381365227666797, guid: 0091a2da6175f6c4ea388edb6365039d, type: 3}
+  player: {fileID: 1849745994}
+  minDistanceFromPlayer: 10
+  spawnRangeX: 20
+  spawnRangeZ: 20
+  spawnInterval: 5
+  startDelay: 2
+  enemiesPerSpawn: 2
 --- !u!1 &243928867
 GameObject:
   m_ObjectHideFlags: 0
@@ -1748,7 +1750,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 793423546}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8485b63ea5c28ac448c4d1056cda8c4a, type: 3}
   m_Name: 
@@ -2846,6 +2848,19 @@ MonoBehaviour:
   maxEquippedSpells: 2
   equippedSpells:
   - {fileID: 3854896913943547373, guid: db4b7ede5e8c97746889d7f9b53488da, type: 3}
+--- !u!114 &1849746012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849745992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcfb6737908ebd344aaff120f651c5d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerEquipmentCollector
+  equipmentTag: Equipment
 --- !u!1 &1896554197
 GameObject:
   m_ObjectHideFlags: 0
@@ -3139,6 +3154,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2faa610713d3b3c439473daa55e8c60a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1849746010}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2faa610713d3b3c439473daa55e8c60a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1849746012}
   m_SourcePrefab: {fileID: 100100000, guid: 2faa610713d3b3c439473daa55e8c60a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
