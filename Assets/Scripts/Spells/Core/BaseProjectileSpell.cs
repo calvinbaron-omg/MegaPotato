@@ -248,15 +248,21 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     // =======================================================
     public abstract void CastSpell(Transform caster, Vector3 targetPosition);
 
-    protected virtual GameObject CreateProjectile(Transform caster, Vector3 targetPosition)
+    // direction should already be normalized
+    protected virtual GameObject CreateProjectile(Transform caster, Vector3 direction, float heightOffset = 1.1f)
     {
-        Vector3 dir = (targetPosition - caster.position).normalized;
-        Vector3 spawnPos = caster.position + dir * 1f;
-
+        // spawn where the "muzzle" would be: player height + forward offset
+        Vector3 spawnPos =
+            caster.position
+            + Vector3.up * heightOffset
+            + direction * 1f; // 1 unit in front
+        Debug.Log("Projectile Spawn Pos: " + spawnPos.y);
         GameObject proj = Instantiate(spellProjectilePrefab, spawnPos, Quaternion.identity);
         EnsureProjectileComponents(proj);
         return proj;
     }
+
+
 
     private void EnsureProjectileComponents(GameObject proj)
     {

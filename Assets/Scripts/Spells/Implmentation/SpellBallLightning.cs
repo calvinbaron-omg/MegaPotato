@@ -5,9 +5,10 @@ public class SpellBallLightning : BaseProjectileSpell
 {
     [Header("Ball Lightning Settings")]
     [SerializeField] private float shockChance = 0.25f;
-    [SerializeField] private float shockAmount = 1.0f; // 1 = full stun
+    [SerializeField] private float shockAmount = 1.0f;
     [SerializeField] private float shockDuration = 1.5f;
 
+    
     public override void CastSpell(Transform caster, Vector3 targetPosition)
     {
         PlayerStats stats = caster.GetComponent<PlayerStats>();
@@ -19,11 +20,16 @@ public class SpellBallLightning : BaseProjectileSpell
 
         SpellRuntimeStats effective = CalculateEffectiveStats(stats);
 
-        GameObject lightning = CreateProjectile(caster, targetPosition);
-        BallLightningBehavior behavior = lightning.AddComponent<BallLightningBehavior>();
+        float heightOffset = 1.1f;
+        Vector3 start = caster.position + Vector3.up * heightOffset;
+        Vector3 end = targetPosition + Vector3.up * heightOffset;
+        Vector3 dir = (end - start).normalized;
+
+        GameObject fireball = CreateProjectile(caster, dir, heightOffset);
+        FireballBehavior behavior = fireball.AddComponent<FireballBehavior>();
 
         behavior.Initialize(
-            targetPosition,
+            dir,
             effective.projectileSpeed,
             effective.lifetime,
             effective.damage,
@@ -35,7 +41,6 @@ public class SpellBallLightning : BaseProjectileSpell
             effective.critDamage
         );
     }
-
 
     public override List<SpellStatType> GetUpgradeableStats() =>
         new List<SpellStatType> {

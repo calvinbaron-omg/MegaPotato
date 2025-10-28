@@ -4,8 +4,17 @@ public class ShieldItem : Item
 {
     public float duration = 5f;
 
-    protected override void ApplyEffect(PlayerStats player)
+     protected override void ApplyEffect(PlayerStats player)
     {
-        player.StartCoroutine(player.ActivateShield(duration));
+        PlayerHealth health = player.GetComponent<PlayerHealth>();
+        if (health != null)
+        {
+            health.ActivateInvincibility(duration);
+            Debug.Log($"[ShieldItem] Player is invincible for {duration} seconds.");
+        }
+        else
+        {
+            
+        }
     }
 }

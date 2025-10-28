@@ -8,6 +8,7 @@ public class SpellFrozenOrb : BaseProjectileSpell
     [SerializeField] private float slowAmount = 0.5f;
     [SerializeField] private float slowDuration = 2f;
 
+   
     public override void CastSpell(Transform caster, Vector3 targetPosition)
     {
         PlayerStats stats = caster.GetComponent<PlayerStats>();
@@ -16,23 +17,32 @@ public class SpellFrozenOrb : BaseProjectileSpell
             Debug.LogError("PlayerStats missing on caster!");
             return;
         }
-
+        //PLayer y bottom = 0.1 jump y goes to 3 or 4
+        //Enemy y bottom = 1 
         SpellRuntimeStats effective = CalculateEffectiveStats(stats);
 
-        GameObject orb = CreateProjectile(caster, targetPosition);
-        FrozenOrbBehavior behavior = orb.AddComponent<FrozenOrbBehavior>();
+        float heightOffset = 1.1f;
+        Vector3 start = caster.position + Vector3.up * heightOffset;
+        //Vector3 end = targetPosition + Vector3.up * heightOffset;
+        //This wont work if we add enemies on vertical structures
+        //Will need to figure out why some enemies have a y of 1, or 1.5 when the player has a y of 0.1 on the same plane
+        Vector3 end = new Vector3(targetPosition.x, 0.1f + heightOffset, targetPosition.z);
+        Vector3 dir = (end - start).normalized;
+
+        GameObject fireball = CreateProjectile(caster, dir, heightOffset);
+        FireballBehavior behavior = fireball.AddComponent<FireballBehavior>();
 
         behavior.Initialize(
-            targetPosition,
-            effective.projectileSpeed,
-            effective.lifetime,
-            effective.damage,
-            slowChance,
-            slowAmount,
-            slowDuration,
-            effective.aoe,
-            effective.critChance,
-            effective.critDamage
+            dir,
+                effective.projectileSpeed,
+                effective.lifetime,
+                effective.damage,
+                slowChance,
+                slowAmount,
+                slowDuration,
+                effective.aoe,
+                effective.critChance,
+                effective.critDamage
         );
     }
 
@@ -61,8 +71,6 @@ public class SpellFrozenOrb : BaseProjectileSpell
 
     public override void ApplyStatUpgrade(SpellStatType statType, float val, int flat = 0)
     {
-        Debug.Log($"Upgrading {SpellName} on {gameObject.GetInstanceID()} to damageMult {upgradeDamageMult}");
-
         switch (statType)
         {
             case SpellStatType.Damage: upgradeDamageMult *= (1f + val); break;

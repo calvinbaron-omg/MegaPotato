@@ -7,7 +7,9 @@ public class EnemyHealth : Health
     
     void Start()
     {
-        pickupDrop = GetComponent<PickupDrop>(); 
+        pickupDrop = GetComponent<PickupDrop>();
+        PlayerLevel playerLevel = GameObject.FindFirstObjectByType<PlayerLevel>(); ;
+        this.maxHealth = base.maxHealth * playerLevel.currentLevel;
     }
 
     public override void TakeDamage(float amount, bool isCrit = false)

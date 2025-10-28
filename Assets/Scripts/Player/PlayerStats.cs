@@ -1,258 +1,166 @@
 using UnityEngine;
 using System;
-using System.Collections;
 
-[Serializable]
 public class PlayerStats : MonoBehaviour
 {
-    [Header("Combat Stats")]
-    //TODO: This is not attack speed, this is projectile speed
-    [SerializeField] private float baseAttackSpeed = 1.0f;
-    [SerializeField] private float baseLifeSteal = 0f;
-    [SerializeField] private float baseArmor = 0f;
-    [SerializeField] private float baseDodgeChance = 0f;
-    [SerializeField] private float baseSizeMultiplier = 1f;
+    // ============================================================
+    // 🔔 EVENT
+    // ============================================================
+    public event Action OnStatsChanged;
+    private void NotifyStatsChanged() => OnStatsChanged?.Invoke();
 
+    // ============================================================
+    // ⚔️ CORE OFFENSIVE STATS
+    // ============================================================
+    [Header("Base Offensive Stats")]
+    [SerializeField] private float baseDamageMultiplier = 1.0f;      // 100% base damage
+    [SerializeField] private float baseAttackSpeedMultiplier = 1.0f; // 100% base attack speed
+    [SerializeField] private float baseCritChance = 0.05f;           // 5% base crit chance
+    [SerializeField] private float baseCritDamage = 1.5f;            // 150% crit damage
+    [SerializeField] private float baseSizeMultiplier = 1.0f;        // Projectile size/AoE multiplier
 
-    [Header("Movement Stats")]
+    [Header("Base Combat Stats")]
+    [SerializeField] private float baseLifeSteal = 0f;               // %
+    [SerializeField] private float baseArmor = 0f;                   // %
+    [SerializeField] private float baseEvasionChance = 0f;           // %
+
+    // ============================================================
+    // 🏃 MOVEMENT & MOBILITY
+    // ============================================================
+    [Header("Base Movement Stats")]
     [SerializeField] private float baseMoveSpeed = 5f;
     [SerializeField] private float baseJumpHeight = 8f;
     [SerializeField] private int baseMaxJumps = 1;
-   
-    [Header("Critical Stats")]
-    [SerializeField] private float baseCritChance = 0f;   // e.g. Rogue might start at 0.05 (5%)
-    [SerializeField] private float baseCritDamage = 1.5f; // 150% default
 
-    private float critChanceModifier = 0f;
-    private float critDamageModifier = 1f;
-    private float sizeMultiplier = 1f;
-    public float CurrentCritChance { get; private set; }
-    public float CurrentCritDamage { get; private set; }
+    // ============================================================
+    // 💰 PICKUPS & ECONOMY
+    // ============================================================
+    [Header("Base Collection & Economy")]
+    [SerializeField] private float basePickupRadiusMultiplier = 1f;  // % radius for pickups
+    [SerializeField] private float baseSilverGain = 1f;              // 100% base silver gain
+    [SerializeField] private float baseGoldGain = 1f;                // 100% base gold gain
 
-    [Header("Collection Stats")]
-    [SerializeField] private float baseCollectionRadius = 1f; // Multiplier base
-    [SerializeField] private float baseXPMultiplier = 1f;
-    [SerializeField] private float baseGoldMultiplier = 1f;
-    [SerializeField] private float baseSilverMultiplier = 1f;
+    // ============================================================
+    // ⚙️ SYSTEMIC STATS
+    // ============================================================
+    [Header("Base Systemic Stats")]
+    [SerializeField] private float baseDifficultyMultiplier = 1.0f;  // Adjusts global scaling
+    [SerializeField] private float baseLuckMultiplier = 1.0f;        // Affects drop quality, rarity, etc.
+    [SerializeField] private float baseEliteSpawnChance = 0.05f;     // 5% chance base
+    [SerializeField] private float baseExperienceMultiplier= 1.0f;   // 100% base XP gain
+    // ============================================================
+    // 🔄 RUNTIME BONUSES
+    // ============================================================
+    private float bonusDamage = 0f;
+    private float bonusAttackSpeed = 0f;
+    private float bonusCritChance = 0f;
+    private float bonusCritDamage = 0f;
+    private float bonusSize = 0f;
 
-    [Header("Current Stats (Read Only)")]
-    public float CurrentAttackSpeed { get; private set; }
-    public float CurrentDamagePercent { get; private set; }
-    public float CurrentLifeSteal { get; private set; }
-    public float CurrentArmor { get; private set; }
-    public float CurrentDodgeChance { get; private set; }
-    public float CurrentMoveSpeed { get; private set; }
-    public float CurrentJumpHeight { get; private set; }
-    public int CurrentMaxJumps { get; private set; }
-    public float CurrentCollectionRadiusMultiplier { get; private set; }
-    public float CurrentXPMultiplier { get; private set; }
-    public float CurrentGoldMultiplier { get; private set; }
-    public float CurrentSilverMultiplier { get; private set; }
+    private float bonusLifeSteal = 0f;
+    private float bonusArmor = 0f;
+    private float bonusEvasion = 0f;
 
-    public float CurrentSizeMultiplier { get; private set; }
+    private float bonusMoveSpeed = 0f;
+    private float bonusJumpHeight = 0f;
+    private int bonusMaxJumps = 0;
 
-    // Events for UI updates when stats change
-    public event Action OnStatsChanged;
+    private float bonusPickupRadius = 0f;
+    private float bonusSilverGain = 0f;
+    private float bonusGoldGain = 0f;
 
-    // Modifier tracking
-    private float attackSpeedModifier = 1.0f;
-    private float damageModifierPercent = 1.0f; //1.0f will be no increase. 1.1 will be 10%
-    private float moveSpeedModifier = 1.0f;
-    private float jumpHeightModifier = 1.0f;
-    private float collectionRadiusModifier = 1.0f;
-    private float xpMultiplierModifier = 1.0f;
-    private float goldMultiplierModifier = 1.0f;
-    private float silverMultiplierModifier = 1.0f;
+    private float bonusDifficulty = 0f;
+    private float bonusLuck = 0f;
+    private float bonusEliteSpawnChance = 0f;
+    private float bonusExperience = 0f;
 
-     void Start()
-    {
-        CalculateFinalStats();
-    }
+    // ============================================================
+    // 🧮 ADD METHODS (Trigger OnStatsChanged)
+    // ============================================================
+    public void AddDamageBonus(float percent) { bonusDamage += percent; NotifyStatsChanged(); }
+    public void AddAttackSpeedBonus(float percent) { bonusAttackSpeed += percent; NotifyStatsChanged(); }
+    public void AddCritChanceBonus(float percent) { bonusCritChance += percent; NotifyStatsChanged(); }
+    public void AddCritDamageBonus(float percent) { bonusCritDamage += percent; NotifyStatsChanged(); }
+    public void AddSizeBonus(float percent) { bonusSize += percent; NotifyStatsChanged(); }
 
-    void CalculateFinalStats()
-    {
-        // Calculate final stats with all modifiers
-        CurrentAttackSpeed = baseAttackSpeed * attackSpeedModifier;
-        CurrentDamagePercent =  damageModifierPercent;
-        CurrentLifeSteal = baseLifeSteal;
-        CurrentArmor = baseArmor;
-        CurrentDodgeChance = baseDodgeChance;
-        CurrentMoveSpeed = baseMoveSpeed * moveSpeedModifier;
-        CurrentJumpHeight = baseJumpHeight * jumpHeightModifier;
-        CurrentMaxJumps = baseMaxJumps;
-        CurrentCritChance = baseCritChance * critChanceModifier;
-        CurrentCritDamage = baseCritDamage * critDamageModifier;
-        // New collection multipliers
-        CurrentCollectionRadiusMultiplier = baseCollectionRadius * collectionRadiusModifier;
-        CurrentXPMultiplier = baseXPMultiplier * xpMultiplierModifier;
-        CurrentGoldMultiplier = baseGoldMultiplier * goldMultiplierModifier;
-        CurrentSilverMultiplier = baseSilverMultiplier * silverMultiplierModifier;
-        CurrentSizeMultiplier = baseSizeMultiplier * sizeMultiplier;
-        // Notify listeners that stats have changed
-        OnStatsChanged?.Invoke();
-    }
+    public void AddLifeSteal(float percent) { bonusLifeSteal += percent; NotifyStatsChanged(); }
+    public void AddArmor(float percent) { bonusArmor += percent; NotifyStatsChanged(); }
+    public void AddEvasionChance(float percent) { bonusEvasion += percent; NotifyStatsChanged(); }
 
-    // ===== PUBLIC METHODS FOR POWER-UPS =====
-    public void AddCollectionRadius(float multiplier)
-    {
-        collectionRadiusModifier += multiplier;
-        CalculateFinalStats();
-    }
+    public void AddMoveSpeed(float percent) { bonusMoveSpeed += percent; NotifyStatsChanged(); }
+    public void AddJumpHeight(float percent) { bonusJumpHeight += percent; NotifyStatsChanged(); }
+    public void AddExtraJump(int extraJumps = 1) { bonusMaxJumps += extraJumps; NotifyStatsChanged(); }
 
-    public void AddXPMultiplier(float multiplier)
-    {
-        xpMultiplierModifier += multiplier;
-        CalculateFinalStats();
-    }
+    public void AddPickupRadius(float percent) { bonusPickupRadius += percent; NotifyStatsChanged(); }
+    public void AddSilverGain(float percent) { bonusSilverGain += percent; NotifyStatsChanged(); }
+    public void AddGoldGain(float percent) { bonusGoldGain += percent; NotifyStatsChanged(); }
 
-    public void AddGoldMultiplier(float multiplier)
-    {
-        goldMultiplierModifier += multiplier;
-        CalculateFinalStats();
-    }
+    public void AddDifficulty(float percent) { bonusDifficulty += percent; NotifyStatsChanged(); }
+    public void AddLuck(float percent) { bonusLuck += percent; NotifyStatsChanged(); }
+    public void AddEliteSpawnChance(float percent) { bonusEliteSpawnChance += percent; NotifyStatsChanged(); }
+    public void AddExperience(float percent) { bonusExperience += percent; NotifyStatsChanged(); }
 
-    public void AddSilverMultiplier(float multiplier)
-    {
-        silverMultiplierModifier += multiplier;
-        CalculateFinalStats();
-    }
-    public void AddAttackSpeed(float multiplier)
-    {
-        attackSpeedModifier += multiplier;
-        CalculateFinalStats();
-    }
 
-    public void AddDamage(float multiplier)
-    {
-        damageModifierPercent += multiplier;
-        CalculateFinalStats();
-    }
+    // ============================================================
+    // 📊 GETTERS (Final Values)
+    // ============================================================
+    // Offensive
+    public float GetDamagePercent() => baseDamageMultiplier * (1f + bonusDamage);
+    public float GetAttackSpeed() => baseAttackSpeedMultiplier * (1f + bonusAttackSpeed);
+    public float GetCritChance() => baseCritChance + bonusCritChance;
+    public float GetCritDamage() => baseCritDamage * (1f + bonusCritDamage);
+    public float GetSizeMultiplier() => baseSizeMultiplier * (1f + bonusSize);
 
-    public void AddLifeSteal(float amount)
-    {
-        baseLifeSteal += amount;
-        CalculateFinalStats();
-    }
+    // Combat
+    public float GetLifeSteal() => baseLifeSteal + bonusLifeSteal;
+    public float GetArmor() => baseArmor + bonusArmor;
+    public float GetEvasionChance() => baseEvasionChance + bonusEvasion;
 
-    public void AddArmor(float amount)
-    {
-        baseArmor += amount;
-        CalculateFinalStats();
-    }
+    // Movement
+    public float GetMoveSpeed() => baseMoveSpeed * (1f + bonusMoveSpeed);
+    public float GetJumpHeight() => baseJumpHeight * (1f + bonusJumpHeight);
+    public int GetMaxJumps() => baseMaxJumps + bonusMaxJumps;
 
-    public void AddDodgeChance(float amount)
-    {
-        baseDodgeChance = Mathf.Clamp(baseDodgeChance + amount, 0f, 0.8f); // Cap at 80%
-        CalculateFinalStats();
-    }
+    // Collection & Economy
+    public float GetPickupRadiusMultiplier() => basePickupRadiusMultiplier * (1f + bonusPickupRadius);
+    public float GetSilverGain() => baseSilverGain * (1f + bonusSilverGain);
+    public float GetGoldGain() => baseGoldGain * (1f + bonusGoldGain);
 
-    public void AddMoveSpeed(float multiplier)
-    {
-        moveSpeedModifier += multiplier;
-        CalculateFinalStats();
-    }
+    // Systemic
+    public float GetDifficultyMultiplier() => baseDifficultyMultiplier * (1f + bonusDifficulty);
+    public float GetLuckMultiplier() => baseLuckMultiplier * (1f + bonusLuck);
+    public float GetEliteSpawnChance() => baseEliteSpawnChance + bonusEliteSpawnChance;
+    public float GetExperienceMultiplier() => baseExperienceMultiplier + bonusExperience;
 
-    public void AddJumpHeight(float multiplier)
-    {
-        jumpHeightModifier += multiplier;
-        CalculateFinalStats();
-    }
 
-    public void AddExtraJump()
-    {
-        baseMaxJumps++;
-        CalculateFinalStats();
-    }
-    public void AddCritChance(float amount)
-    {
-        critChanceModifier += amount;
-        CalculateFinalStats();
-    }
-
-    public void AddCritDamage(float multiplier)
-    {
-        critDamageModifier *= (1f + multiplier);
-        CalculateFinalStats();
-    }
-
-    // Getters (used by BaseProjectileSpell)
-    public float GetCritChance() => CurrentCritChance;
-    public float GetCritDamage() => CurrentCritDamage;
-    public float GetSizeMultiplier() => CurrentSizeMultiplier;
-
-    // ===== GETTER METHODS FOR OTHER SCRIPTS =====
-
-    public float GetCollectionRadiusMultiplier() => CurrentCollectionRadiusMultiplier;
-    public float GetXPMultiplier() => CurrentXPMultiplier;
-    public float GetGoldMultiplier() => CurrentGoldMultiplier;
-    public float GetSilverMultiplier() => CurrentSilverMultiplier;
-    public float GetAttackSpeed() => CurrentAttackSpeed;
-    public float GetDamagePercent() => CurrentDamagePercent;
-    public float GetLifeSteal() => CurrentLifeSteal;
-    public float GetArmor() => CurrentArmor;
-    public float GetDodgeChance() => CurrentDodgeChance;
-    public float GetMoveSpeed() => CurrentMoveSpeed;
-    public float GetJumpHeight() => CurrentJumpHeight;
-    public int GetMaxJumps() => CurrentMaxJumps;
-
-    // ===== UTILITY METHODS =====
-
-    public bool TryDodge()
-    {
-        return UnityEngine.Random.value <= CurrentDodgeChance;
-    }
-
-    public float CalculateDamageReduction(float incomingDamage)
-    {
-        // Simple armor formula: reduces damage by armor percentage
-        float reduction = incomingDamage * (CurrentArmor / 100f);
-        return Mathf.Max(incomingDamage - reduction, 1f); // Minimum 1 damage
-    }
-
-    public float CalculateLifeSteal(float damageDealt)
-    {
-        return damageDealt * (CurrentLifeSteal / 100f);
-    }
-
-    public IEnumerator SpeedBoost(float multiplier, float duration)
-    {
-        moveSpeedModifier *= multiplier;
-        CalculateFinalStats();
-        yield return new WaitForSeconds(duration);
-        moveSpeedModifier /= multiplier;
-        CalculateFinalStats();
-    }
-
-    public IEnumerator DamageBoost(float multiplier, float duration)
-    {
-        // baseDamage *= multiplier;
-        // yield return new WaitForSeconds(duration);
-        // baseDamage /= multiplier;
-        return null;
-    }
-
-    public IEnumerator ActivateShield(float duration)
-    {
-        // isShielded = true;
-        // yield return new WaitForSeconds(duration);
-        // isShielded = false;
-        return null;
-    }
-
+    // ============================================================
+    // ♻️ RESET (New Run)
+    // ============================================================
     public void ResetToBaseValues()
-{
-    critChanceModifier = 0f;
-    critDamageModifier = 1f;
-    attackSpeedModifier = 1f;
-    damageModifierPercent = 1f;
-    moveSpeedModifier = 1f;
-    jumpHeightModifier = 1f;
-    collectionRadiusModifier = 1f;
-    xpMultiplierModifier = 1f;
-    goldMultiplierModifier = 1f;
-    silverMultiplierModifier = 1f;
+    {
+        bonusDamage = 0f;
+        bonusAttackSpeed = 0f;
+        bonusCritChance = 0f;
+        bonusCritDamage = 0f;
+        bonusSize = 0f;
 
-    CalculateFinalStats();
-}
+        bonusLifeSteal = 0f;
+        bonusArmor = 0f;
+        bonusEvasion = 0f;
 
+        bonusMoveSpeed = 0f;
+        bonusJumpHeight = 0f;
+        bonusMaxJumps = 0;
+
+        bonusPickupRadius = 0f;
+        bonusSilverGain = 0f;
+        bonusGoldGain = 0f;
+
+        bonusDifficulty = 0f;
+        bonusLuck = 0f;
+        bonusEliteSpawnChance = 0f;
+        bonusExperience = 0f;
+
+        NotifyStatsChanged();
+    }
 }

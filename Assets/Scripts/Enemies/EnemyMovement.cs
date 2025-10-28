@@ -29,7 +29,7 @@ public class EnemyMovement : MonoBehaviour
         // Move toward player position
         Vector3 direction = (player.position - transform.position).normalized;
         rb.linearVelocity = direction * chaseSpeed;
-        
+
         // Rotate to face player
         if (direction != Vector3.zero)
         {

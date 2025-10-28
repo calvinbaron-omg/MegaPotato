@@ -7,6 +7,11 @@ public class SpeedBoostItem : Item
 
     protected override void ApplyEffect(PlayerStats player)
     {
-        player.StartCoroutine(player.SpeedBoost(speedMultiplier, duration));
+        var tempEffects = player.GetComponent<PlayerTemporaryEffects>();
+        if (tempEffects != null)
+        {
+            tempEffects.ApplySpeedBoost(speedMultiplier, duration);
+        }
     }
+
 }

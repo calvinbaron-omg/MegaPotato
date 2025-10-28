@@ -59,7 +59,7 @@ public class PlayerPickupCollector : MonoBehaviour
     void UpdateCollectionStats()
     {
         // Get collection radius multiplier from PlayerStats
-        float collectionRadiusMultiplier = playerStats != null ? playerStats.GetCollectionRadiusMultiplier() : 1f;
+        float collectionRadiusMultiplier = playerStats != null ? playerStats.GetPickupRadiusMultiplier() : 1f;
         
         currentCollectionRadius = baseCollectionRadius * collectionRadiusMultiplier;
         currentMoveSpeed = baseMoveSpeed; // Just use base move speed without multiplier
@@ -125,9 +125,9 @@ public class PlayerPickupCollector : MonoBehaviour
     {
         if (pickup == null) return;
         
-        float xpMultiplier = playerStats != null ? playerStats.GetXPMultiplier() : 1f;
-        float goldMultiplier = playerStats != null ? playerStats.GetGoldMultiplier() : 1f;
-        float silverMultiplier = playerStats != null ? playerStats.GetSilverMultiplier() : 1f;
+        float xpMultiplier = playerStats != null ? playerStats.GetExperienceMultiplier() : 1f;
+        float goldMultiplier = playerStats != null ? playerStats.GetGoldGain() : 1f;
+        float silverMultiplier = playerStats != null ? playerStats.GetSilverGain() : 1f;
         
         switch (pickup.pickupType)
         {
