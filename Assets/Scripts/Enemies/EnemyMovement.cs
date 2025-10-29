@@ -5,7 +5,7 @@ public class EnemyMovement : MonoBehaviour
     [Header("Movement Settings")]
     public float chaseSpeed = 3f;
     public float damageAmount = 20f;
-    
+
     private Transform player;
     private Rigidbody rb;
 
@@ -15,19 +15,22 @@ public class EnemyMovement : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player").transform;
         rb = GetComponent<Rigidbody>();
     }
-    
+
     void FixedUpdate()
     {
         // Chase player every physics frame
         ChasePlayer();
     }
-    
+
     void ChasePlayer()
     {
         if (player == null) return;
-        
+
+        // Calculate direction only in the XZ plane
+        Vector3 targetPosition = new Vector3(player.position.x, transform.position.y, player.position.z);
+        Vector3 direction = (targetPosition - transform.position).normalized;
+
         // Move toward player position
-        Vector3 direction = (player.position - transform.position).normalized;
         rb.linearVelocity = direction * chaseSpeed;
 
         // Rotate to face player
@@ -43,7 +46,7 @@ public class EnemyMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             Health playerHealth = collision.gameObject.GetComponent<Health>();
-            if(playerHealth != null)
+            if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damageAmount);
             }
