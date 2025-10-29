@@ -24,11 +24,6 @@ public static class PlayModeResetter
             if (pool != null)
             {
                 pool.ResetAllSpellsToBase();
-                Debug.Log("[PlayModeResetter] All spell prefabs reset on exiting Play Mode.");
-            }
-            else
-            {
-                Debug.LogWarning("[PlayModeResetter] No SpellPoolManager found to reset spells.");
             }
         }
     }
