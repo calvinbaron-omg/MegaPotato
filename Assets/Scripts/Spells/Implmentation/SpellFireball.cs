@@ -8,7 +8,7 @@ public class SpellFireball : BaseProjectileSpell
     [SerializeField] private float burnDamage = 5f;
     [SerializeField] private float burnDuration = 3f;
 
-    public override void CastSpell(Transform caster, Vector3 targetPosition)
+    public override void CastSpell(Transform caster, Vector3 targetPosition, Vector3 targetScale)
     {
         PlayerStats stats = caster.GetComponent<PlayerStats>();
         if (stats == null)

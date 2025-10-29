@@ -9,7 +9,7 @@ public class SpellFrozenOrb : BaseProjectileSpell
     [SerializeField] private float slowDuration = 2f;
 
    
-    public override void CastSpell(Transform caster, Vector3 targetPosition)
+    public override void CastSpell(Transform caster, Vector3 targetPosition, Vector3 targetScale)
     {
         PlayerStats stats = caster.GetComponent<PlayerStats>();
         if (stats == null)
@@ -23,10 +23,11 @@ public class SpellFrozenOrb : BaseProjectileSpell
 
         float heightOffset = 1.1f;
         Vector3 start = caster.position + Vector3.up * heightOffset;
-        //Vector3 end = targetPosition + Vector3.up * heightOffset;
-        //This wont work if we add enemies on vertical structures
-        //Will need to figure out why some enemies have a y of 1, or 1.5 when the player has a y of 0.1 on the same plane
-        Vector3 end = new Vector3(targetPosition.x, 0.1f + heightOffset, targetPosition.z);
+        //Green enemies are at targetpostition y = +- 0.2 that is 0.1 * scale.y(2)
+        //Red enemies are at targetpostition y = +- 0.1 that is 0.1 * scale.y(1)
+        float enemyScaleOffset = (0.1f * targetScale.y) - 0.1f;
+        Vector3 endTemp = targetPosition + Vector3.up * heightOffset;
+        Vector3 end = new Vector3(endTemp.x, endTemp.y - enemyScaleOffset, endTemp.z);
         Vector3 dir = (end - start).normalized;
 
         GameObject fireball = CreateProjectile(caster, dir, heightOffset);

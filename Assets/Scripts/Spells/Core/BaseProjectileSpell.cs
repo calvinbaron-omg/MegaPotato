@@ -150,7 +150,6 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
                 ApplyStatUpgrade(upgrade.statType, scaledVal, 0);
             }
         
-            Debug.Log($"Applied {upgrade.uiText} ({upgrade.rarity}) to {SpellName}");
         }  
         LevelUp();
     }
@@ -246,7 +245,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     // =======================================================
     // PROJECTILE SPAWNING
     // =======================================================
-    public abstract void CastSpell(Transform caster, Vector3 targetPosition);
+    public abstract void CastSpell(Transform caster, Vector3 targetPosition, Vector3 targetScale);
 
     // direction should already be normalized
     protected virtual GameObject CreateProjectile(Transform caster, Vector3 direction, float heightOffset = 1.1f)
@@ -256,7 +255,6 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             caster.position
             + Vector3.up * heightOffset
             + direction * 1f; // 1 unit in front
-        Debug.Log("Projectile Spawn Pos: " + spawnPos.y);
         GameObject proj = Instantiate(spellProjectilePrefab, spawnPos, Quaternion.identity);
         EnsureProjectileComponents(proj);
         return proj;

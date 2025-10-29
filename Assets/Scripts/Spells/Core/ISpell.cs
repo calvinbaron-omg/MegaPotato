@@ -13,7 +13,7 @@ public interface ISpell
     float BaseRange { get; }
     
     // Spell activation
-    void CastSpell(Transform caster, Vector3 targetPosition);
+    void CastSpell(Transform caster, Vector3 targetPosition, Vector3 targetScale);
     
     // Calculation modifiers
     float GetActualCooldown(float globalAttackSpeed);

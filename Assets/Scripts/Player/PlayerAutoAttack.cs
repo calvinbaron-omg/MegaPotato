@@ -63,7 +63,7 @@ public class PlayerAutoAttack : MonoBehaviour
 
                     if (target != null)
                     {
-                        spell.CastSpell(transform, target.position);
+                        spell.CastSpell(transform, target.position, target.localScale);
                         spellCooldowns[spellPrefab] = Time.time;
                     }
                 }

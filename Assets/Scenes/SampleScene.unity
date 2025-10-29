@@ -842,16 +842,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   enemyPrefabs:
-  - {fileID: 4961392323306338389, guid: bf831fd410051394082bc3777c61b14b, type: 3}
+  - {fileID: 7076439466621571088, guid: abb71ca3e5eee254eabd3607fb9a6491, type: 3}
   eliteEnemyPrefabs:
-  - {fileID: 99381365227666797, guid: 0091a2da6175f6c4ea388edb6365039d, type: 3}
+  - {fileID: 7076439466621571088, guid: ccfd12a9fb467ff49a7704f7677cc09d, type: 3}
   player: {fileID: 1849745994}
+  playerStats: {fileID: 0}
   minDistanceFromPlayer: 10
   spawnRangeX: 20
   spawnRangeZ: 20
   spawnInterval: 2
   startDelay: 0
-  enemiesPerSpawn: 3
+  enemiesPerSpawn: 2
+  baseEliteSpawnChance: 5
 --- !u!1 &243928867
 GameObject:
   m_ObjectHideFlags: 0
@@ -3568,6 +3570,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2717395650310496025, guid: 2faa610713d3b3c439473daa55e8c60a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 0284dd58f95849a4b80c2b98348a80ce, type: 2}
     - target: {fileID: 919132149155446097, guid: 2faa610713d3b3c439473daa55e8c60a, type: 3}
       propertyPath: m_Name
       value: Player
