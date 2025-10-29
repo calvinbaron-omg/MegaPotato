@@ -1,95 +1,116 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerHealth : Health
 {
     [Header("Player Invincibility")]
-    public float invincibilityTime = 1f;    // Duration of invincibility after taking damage
-    public bool useFlashEffect = true;      // Visual feedback during invincibility
-    
+    [Tooltip("Duration of brief invulnerability after taking damage.")]
+    public float invincibilityTime = 1f;
+    [Tooltip("Visual flash effect during invincibility.")]
+    public bool useFlashEffect = true;
+
+    [Header("Shield (Full Invincibility) Settings")]
+    [Tooltip("Color applied when a temporary shield/invincibility buff is active.")]
+    public Color invincibleColor = new Color(1f, 1f, 0.4f, 1f); // yellowish glow
+    public bool showShieldEffect = true;
+
     private bool isInvincible = false;
     private float invincibilityTimer = 0f;
+    private Coroutine invincibilityRoutine;
     private SpriteRenderer spriteRenderer;
+    private Color originalColor;
 
     protected override void Awake()
     {
-        // Initialize health and get sprite renderer for visual effects
         base.Awake();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+            originalColor = spriteRenderer.color;
     }
 
     private void Update()
     {
-        // Handle invincibility frames countdown
-        if (isInvincible)
+        // Handle normal invincibility countdown (from taking damage)
+        if (isInvincible && invincibilityRoutine == null)
         {
             invincibilityTimer -= Time.deltaTime;
-            
-            // Visual flash effect during invincibility
+
             if (useFlashEffect && spriteRenderer != null)
-            {
                 spriteRenderer.enabled = Mathf.PingPong(Time.time * 10f, 1f) > 0.5f;
-            }
-            
-            // End invincibility when timer expires
+
             if (invincibilityTimer <= 0)
             {
-                isInvincible = false;
-                if (spriteRenderer != null)
-                    spriteRenderer.enabled = true;
+                EndInvincibility();
             }
         }
     }
 
     public override void TakeDamage(float amount, bool isCrit = false)
     {
-        // Ignore damage if currently invincible
+        // Ignore all damage while invincible or shielded
         if (isInvincible) return;
-        
+
         base.TakeDamage(amount, isCrit);
-        
-        // Start invincibility if damage was taken and player is still alive
+
+        // Trigger brief iframes after taking damage
         if (amount > 0 && currentHealth > 0)
-        {
-            StartInvincibility();
-        }
+            StartInvincibility(invincibilityTime);
     }
 
-    // NEW METHOD: Add healing functionality
     public void Heal(float healAmount)
     {
         if (healAmount <= 0) return;
-        
-        currentHealth += healAmount;
-        
-        // Clamp health to not exceed max health
-        if (currentHealth > maxHealth)
-        {
-            currentHealth = maxHealth;
-        }
-        
+        currentHealth = Mathf.Min(currentHealth + healAmount, maxHealth);
     }
 
-    private void StartInvincibility()
+    private void StartInvincibility(float duration)
     {
-        // Begin invincibility period with visual feedback
         isInvincible = true;
-        invincibilityTimer = invincibilityTime;
+        invincibilityTimer = duration;
+    }
+
+    private void EndInvincibility()
+    {
+        isInvincible = false;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = true;
+            spriteRenderer.color = originalColor;
+        }
+    }
+
+    // ============================================================
+    // 🛡️ NEW: Activate Full Invincibility ("Shield")
+    // ============================================================
+    public void ActivateInvincibility(float duration)
+    {
+        if (invincibilityRoutine != null)
+            StopCoroutine(invincibilityRoutine);
+
+        invincibilityRoutine = StartCoroutine(InvincibilityRoutine(duration));
+    }
+
+    private IEnumerator InvincibilityRoutine(float duration)
+    {
+        isInvincible = true;
+
+        if (showShieldEffect && spriteRenderer != null)
+            spriteRenderer.color = invincibleColor;
+
+        yield return new WaitForSeconds(duration);
+
+        EndInvincibility();
+        invincibilityRoutine = null;
     }
 
     protected override void HandleDeath()
     {
-        // Trigger game over when player dies
-        GameManager gameManager = FindAnyObjectByType<GameManager>();
+        var gameManager = FindAnyObjectByType<GameManager>();
         if (gameManager != null)
-        {
             gameManager.TriggerGameOver();
-        }
-        
+
         gameObject.SetActive(false);
     }
-    
-    public bool IsInvincible()
-    {
-        return isInvincible;
-    }
+
+    public bool IsInvincible() => isInvincible;
 }

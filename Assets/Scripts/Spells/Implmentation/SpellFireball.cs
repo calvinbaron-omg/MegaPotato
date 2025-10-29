@@ -19,11 +19,16 @@ public class SpellFireball : BaseProjectileSpell
 
         SpellRuntimeStats effective = CalculateEffectiveStats(stats);
 
-        GameObject fireball = CreateProjectile(caster, targetPosition);
+        float heightOffset = 1.1f;
+        Vector3 start = caster.position + Vector3.up * heightOffset;
+        Vector3 end = targetPosition + Vector3.up * heightOffset;
+        Vector3 dir = (end - start).normalized;
+
+        GameObject fireball = CreateProjectile(caster, dir, heightOffset);
         FireballBehavior behavior = fireball.AddComponent<FireballBehavior>();
 
         behavior.Initialize(
-            targetPosition,
+            dir,
             effective.projectileSpeed,
             effective.lifetime,
             effective.damage,
@@ -35,7 +40,6 @@ public class SpellFireball : BaseProjectileSpell
             effective.critDamage
         );
     }
-
 
     public override List<SpellStatType> GetUpgradeableStats() =>
         new List<SpellStatType> {

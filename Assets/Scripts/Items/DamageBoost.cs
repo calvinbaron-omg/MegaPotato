@@ -7,6 +7,11 @@ public class DamageBoostItem : Item
 
     protected override void ApplyEffect(PlayerStats player)
     {
-        player.StartCoroutine(player.DamageBoost(damageMultiplier, duration));
+        var tempEffects = player.GetComponent<PlayerTemporaryEffects>();
+        if (tempEffects != null)
+        {
+            tempEffects.ApplyDamageBoost(damageMultiplier, duration);
+        }
     }
+    
 }

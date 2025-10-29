@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class FrozenOrbBehavior : MonoBehaviour
 {
-    private Vector3 targetPosition;
+    private Vector3 moveDirection;
     private float speed;
     private float lifetime;
     private float baseDamage;
@@ -14,7 +14,7 @@ public class FrozenOrbBehavior : MonoBehaviour
     private float critDamageMultiplier;
 
     public void Initialize(
-        Vector3 targetPos,
+        Vector3 direction,
         float spd,
         float life,
         float baseDmg,
@@ -26,7 +26,7 @@ public class FrozenOrbBehavior : MonoBehaviour
         float critMult
     )
     {
-        targetPosition = targetPos;
+        moveDirection = direction.normalized;
         speed = spd;
         lifetime = life;
         baseDamage = baseDmg;
@@ -42,17 +42,16 @@ public class FrozenOrbBehavior : MonoBehaviour
 
     void Update()
     {
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        transform.Translate(direction * speed * Time.deltaTime, Space.World);
+        transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Projectile") || other.CompareTag("Player")) return;
-        
+
         if (other.CompareTag("Enemy"))
         {
-            ApplyAOEEffect();
+            ApplyDamage();
             Destroy(gameObject);
         }
         else
@@ -61,40 +60,29 @@ public class FrozenOrbBehavior : MonoBehaviour
         }
     }
 
-    private void ApplyAOEEffect()
+    private void ApplyDamage()
     {
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, aoeRadius);
         foreach (Collider enemy in hitEnemies)
         {
             if (!enemy.CompareTag("Enemy")) continue;
-            
+
             Health health = enemy.GetComponent<Health>();
             if (health == null) continue;
 
-            // crit roll
-            float damageToApply = baseDamage;
+            float damage = baseDamage;
             bool isCrit = Random.value < critChance;
             if (isCrit)
-            {
-                damageToApply *= critDamageMultiplier;
-                // TODO: spawn crit VFX / popup text etc.
-            }
+                damage *= critDamageMultiplier;
 
-            health.TakeDamage(damageToApply, isCrit);
-            
+            health.TakeDamage(damage, isCrit);
 
-            // slow roll
             if (Random.value <= slowChance)
             {
-                ApplySlow(enemy.gameObject);
+                EnemyStatus status = enemy.GetComponent<EnemyStatus>();
+                status?.ApplySlow(slowAmount, slowDuration);
             }
         }
-    }
-
-    private void ApplySlow(GameObject enemy)
-    {
-        EnemyStatus status = enemy.GetComponent<EnemyStatus>();
-        status?.ApplySlow(slowAmount, slowDuration);
     }
 
     void OnDrawGizmosSelected()

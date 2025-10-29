@@ -21,6 +21,7 @@ public class PlayerHealthUI : MonoBehaviour
 
     private void Update()
     {
+
         // Update health bar fill amount based on current health
         if (playerHealth != null && healthFill != null)
         {

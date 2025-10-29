@@ -2,19 +2,19 @@ using UnityEngine;
 
 public class BallLightningBehavior : MonoBehaviour
 {
-    private Vector3 targetPosition;
+    private Vector3 moveDirection;
     private float speed;
     private float lifetime;
     private float baseDamage;
-    private float shockChance;     // chance to stun or apply heavy slow
-    private float shockAmount;     // can represent stun intensity or slow %
+    private float shockChance;
+    private float shockAmount;
     private float shockDuration;
     private float aoeRadius;
     private float critChance;
     private float critDamageMultiplier;
 
     public void Initialize(
-        Vector3 targetPos,
+        Vector3 direction,
         float spd,
         float life,
         float baseDmg,
@@ -26,7 +26,7 @@ public class BallLightningBehavior : MonoBehaviour
         float critMult = 1f
     )
     {
-        targetPosition = targetPos;
+        moveDirection = direction.normalized;
         speed = spd;
         lifetime = life;
         baseDamage = baseDmg;
@@ -42,18 +42,16 @@ public class BallLightningBehavior : MonoBehaviour
 
     void Update()
     {
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        transform.Translate(direction * speed * Time.deltaTime, Space.World);
+        transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Projectile") || other.CompareTag("Player"))
-            return;
+        if (other.CompareTag("Projectile") || other.CompareTag("Player")) return;
 
         if (other.CompareTag("Enemy"))
         {
-            ApplyAOEEffect();
+            ApplyDamage();
             Destroy(gameObject);
         }
         else
@@ -62,7 +60,7 @@ public class BallLightningBehavior : MonoBehaviour
         }
     }
 
-    private void ApplyAOEEffect()
+    private void ApplyDamage()
     {
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, aoeRadius);
         foreach (Collider enemy in hitEnemies)
@@ -73,25 +71,19 @@ public class BallLightningBehavior : MonoBehaviour
             if (health == null) continue;
 
             float damage = baseDamage;
-
-            // Crit roll
             bool isCrit = Random.value < critChance;
             if (isCrit)
                 damage *= critDamageMultiplier;
 
             health.TakeDamage(damage, isCrit);
 
-            // Shock (stun/slow) roll
+            // Shock (stun/slow)
             if (Random.value <= shockChance)
-                ApplyShock(enemy.gameObject);
+            {
+                EnemyStatus status = enemy.GetComponent<EnemyStatus>();
+                status?.ApplySlow(shockAmount, shockDuration);
+            }
         }
-    }
-
-    private void ApplyShock(GameObject enemy)
-    {
-        EnemyStatus status = enemy.GetComponent<EnemyStatus>();
-        // You can treat shockAmount = 1f as a full stun
-        status?.ApplySlow(shockAmount, shockDuration);
     }
 
     void OnDrawGizmosSelected()

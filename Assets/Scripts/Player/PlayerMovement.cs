@@ -55,6 +55,7 @@ private float currentSpeedParameter = 0f;
 
         if (move != Vector3.zero)
         {
+
             transform.forward = move.normalized;
         }
         
@@ -145,6 +146,7 @@ private float currentSpeedParameter = 0f;
 
     void HandleJump()
     {
+
         // Get jump stats from PlayerStats
         float jumpForce = playerStats != null ? playerStats.GetJumpHeight() : baseJumpForce;
         int maxJumps = playerStats != null ? playerStats.GetMaxJumps() : 1;
@@ -152,6 +154,7 @@ private float currentSpeedParameter = 0f;
         // Jump when Space is pressed and has jumps remaining
         if (Input.GetKeyDown(KeyCode.Space) && currentJumps < maxJumps)
         {
+
             // Apply jump force
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             

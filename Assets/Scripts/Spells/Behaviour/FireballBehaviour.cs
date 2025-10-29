@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class FireballBehavior : MonoBehaviour
 {
-    private Vector3 targetPosition;
+    private Vector3 moveDirection;
     private float speed;
     private float lifetime;
     private float baseDamage;
@@ -14,7 +14,7 @@ public class FireballBehavior : MonoBehaviour
     private float critDamageMultiplier;
 
     public void Initialize(
-        Vector3 targetPos,
+        Vector3 direction,
         float spd,
         float life,
         float baseDmg,
@@ -26,7 +26,7 @@ public class FireballBehavior : MonoBehaviour
         float critMult = 1f
     )
     {
-        targetPosition = targetPos;
+        moveDirection = direction.normalized;
         speed = spd;
         lifetime = life;
         baseDamage = baseDmg;
@@ -42,18 +42,16 @@ public class FireballBehavior : MonoBehaviour
 
     void Update()
     {
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        transform.Translate(direction * speed * Time.deltaTime, Space.World);
+        transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Projectile") || other.CompareTag("Player"))
-            return;
+        if (other.CompareTag("Projectile") || other.CompareTag("Player")) return;
 
         if (other.CompareTag("Enemy"))
         {
-            ApplyAOEDamage();
+            ApplyDamage();
             Destroy(gameObject);
         }
         else
@@ -62,7 +60,7 @@ public class FireballBehavior : MonoBehaviour
         }
     }
 
-    private void ApplyAOEDamage()
+    private void ApplyDamage()
     {
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, aoeRadius);
         foreach (Collider enemy in hitEnemies)
@@ -73,24 +71,18 @@ public class FireballBehavior : MonoBehaviour
             if (health == null) continue;
 
             float damage = baseDamage;
-
-            // Crit roll
             bool isCrit = Random.value < critChance;
             if (isCrit)
                 damage *= critDamageMultiplier;
 
             health.TakeDamage(damage, isCrit);
 
-            // Burn roll
             if (Random.value <= burnChance)
-                ApplyBurn(enemy.gameObject);
+            {
+                EnemyStatus status = enemy.GetComponent<EnemyStatus>();
+                status?.ApplyBurn(burnDamage, burnDuration);
+            }
         }
-    }
-
-    private void ApplyBurn(GameObject enemy)
-    {
-        EnemyStatus status = enemy.GetComponent<EnemyStatus>();
-        status?.ApplyBurn(burnDamage, burnDuration);
     }
 
     void OnDrawGizmosSelected()

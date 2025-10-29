@@ -3,7 +3,8 @@ using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
-    public TMP_Text scoreText;    // UI Text element to display score
+    public TMP_Text timeSurvivedText;    // UI Text element to display score
+    public TMP_Text enemiesKilledText;
     private float timer = 0f;     // Time survived in seconds
     private bool isGameOver = false;
     private int enemyKills = 0;   // Total number of enemies defeated
@@ -27,10 +28,11 @@ public class ScoreManager : MonoBehaviour
     private void UpdateScoreDisplay()
     {
         // Update UI with current time survived and kill count
-        if (scoreText != null)
+        if (timeSurvivedText != null && enemiesKilledText != null)
         {
             int secondsSurvived = Mathf.FloorToInt(timer);
-            scoreText.text = $"Time: {secondsSurvived}s\nKills: {enemyKills}";
+            timeSurvivedText.text = $"Time: {secondsSurvived}s";
+            enemiesKilledText.text = $"Kills: {enemyKills}";
         }
     }
 
