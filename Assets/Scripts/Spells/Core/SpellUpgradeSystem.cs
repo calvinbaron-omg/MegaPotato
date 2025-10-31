@@ -103,7 +103,7 @@ public static class SpellUpgradeFormatter
             case SpellStatType.ProjectileSpeed:
                 return $"Projectile Speed +{percent}%";
             case SpellStatType.Size:
-                return $"Size / AoE Radius +{percent}%";
+                return $"Size +{percent}%";
             case SpellStatType.CritChance:
                 return $"Crit Chance +{percent}%";
             case SpellStatType.CritDamage:

@@ -3,6 +3,9 @@ using System.Collections;
 
 public class SmiteBehavior : MonoBehaviour
 {
+    //TODO Acutally make meta unlocks
+    [Header("Meta Unlock")]
+    private bool allowOverflowDamage = false;
     private float aoeDamage;
     private float aoeRadius;
     private float critChance;
@@ -66,10 +69,25 @@ public class SmiteBehavior : MonoBehaviour
             if (health == null) continue;
 
             float dmg = aoeDamage;
-            bool isCrit = Random.value < critChance;
-            if (isCrit)
+
+            // MEGA BONK
+            float remainingChance = critChance;   // e.g. 1.10f for 110%
+            int guaranteedCrits = Mathf.FloorToInt(remainingChance); // every full 100% = guaranteed
+            float extraChance = remainingChance - guaranteedCrits;
+            //Dont allow more than 20 mega bonks
+            if(guaranteedCrits >= 20 && allowOverflowDamage == false)
+            {
+                guaranteedCrits = 20;
+            }
+            // Apply guaranteed crit layers
+            for (int i = 0; i < guaranteedCrits; i++)
                 dmg *= critDamage;
 
+            // Roll one more time for the fractional part
+            if (Random.value < extraChance)
+                dmg *= critDamage;
+            // Pass in whether we crit at least once (for visuals)
+            bool isCrit = (guaranteedCrits > 0) || (Random.value < extraChance);
             health.TakeDamage(dmg, isCrit);
         }
     }

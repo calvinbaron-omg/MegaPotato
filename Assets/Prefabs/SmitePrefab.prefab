@@ -49,14 +49,14 @@ MonoBehaviour:
   icon: {fileID: 0}
   baseDamage: 10
   baseAttackSpeed: 1
-  baseCritChance: 0
-  baseCritDamage: 1.5
-  baseSize: 1
-  baseAOE: 1
+  baseCritChance: 30
+  baseCritDamage: 0
+  baseSize: 0.1
+  baseAOE: 0.1
   baseLifetime: 3
   baseProjectileSpeed: 8
   baseRange: 8
-  baseProjectileCount: 0
+  baseProjectileCount: 2
   baseProjectileBounce: 0
   upgradeDamageMult: 1
   upgradeAttackSpeedMult: 1
@@ -70,3 +70,4 @@ MonoBehaviour:
   spellProjectilePrefab: {fileID: 1468366854156418543}
   smiteImpactPrefab: {fileID: 3291742302375720490, guid: bdb9ac00f121c614786e7bd7733910f7, type: 3}
   rangeMultiplier: 1.2
+  multiStrikeDelay: 0.05

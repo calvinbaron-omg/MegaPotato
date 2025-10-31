@@ -32,29 +32,7 @@ public class SpellSmite : BaseProjectileSpell
             }
         }
         if (enemy == null) return;
-
-       caster.GetComponent<PlayerAutoAttack>()?.RunSpellCoroutine(SmiteSequence(enemy, effective, strikeCount));
-
-    }
-
-    private System.Collections.IEnumerator SmiteSequence(Transform enemy, SpellRuntimeStats effective, int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            if (enemy == null) yield break;
-
-            Health health = enemy.GetComponent<Health>();
-            if (health == null) yield break;
-
-            float damage = effective.damage;
-            bool isCrit = Random.value < effective.critChance;
-            if (isCrit)
-                damage *= effective.critDamage;
-
-            health.TakeDamage(damage, isCrit);
-
-            // Spawn AoE impact each strike
-            if (smiteImpactPrefab != null)
+        if (smiteImpactPrefab != null)
             {
                 GameObject impact = Instantiate(smiteImpactPrefab, enemy.position, Quaternion.identity);
                 SmiteBehavior smite = impact.GetComponent<SmiteBehavior>();
@@ -67,14 +45,9 @@ public class SpellSmite : BaseProjectileSpell
                     effective.critDamage,
                     Mathf.FloorToInt(effective.count)
                 );
-
                 }
             }
-
-            yield return new WaitForSeconds(multiStrikeDelay);
-        }
     }
-
     public override List<SpellStatType> GetUpgradeableStats() =>
         new List<SpellStatType> {
             SpellStatType.Damage,
@@ -82,20 +55,28 @@ public class SpellSmite : BaseProjectileSpell
             SpellStatType.AttackSpeed,
             SpellStatType.CritChance,
             SpellStatType.CritDamage,
-            SpellStatType.ProjectileCount 
+            SpellStatType.ProjectileCount
         };
 
     public override float GetBaseUpgradeValue(SpellStatType statType)
     {
         switch (statType)
         {
-            case SpellStatType.Damage: return 0.10f;
-            case SpellStatType.Size: return 0.10f;
-            case SpellStatType.AttackSpeed: return 0.10f;
-            case SpellStatType.CritChance: return 0.05f;
-            case SpellStatType.CritDamage: return 0.20f;
-            case SpellStatType.ProjectileCount: return 1f;
+            case SpellStatType.Damage: return 0.05f;
+            case SpellStatType.Size: return 0.05f;
+            case SpellStatType.AttackSpeed: return 0.05f;
+            case SpellStatType.CritChance: return 0.025f;
+            case SpellStatType.CritDamage: return 0.05f;
             default: return 0f;
+        }
+    }
+    public override (bool isFlat, int flatAmount) GetFlatUpgradeInfo(SpellStatType statType)
+    {
+        switch (statType)
+        {
+            case SpellStatType.ProjectileCount: return (true, 1);
+            case SpellStatType.ProjectileBounce: return (true, 1);
+            default: return base.GetFlatUpgradeInfo(statType);
         }
     }
 
@@ -103,11 +84,11 @@ public class SpellSmite : BaseProjectileSpell
     {
         switch (statType)
         {
-            case SpellStatType.Damage: upgradeDamageMult *= (1f + val); break;
-            case SpellStatType.Size: upgradeSizeMult *= (1f + val); break;
-            case SpellStatType.AttackSpeed: upgradeAttackSpeedMult *= (1f + val); break;
+            case SpellStatType.Damage: upgradeDamageMult += val; break;
+            case SpellStatType.Size: upgradeSizeMult += val; break;
+            case SpellStatType.AttackSpeed: upgradeAttackSpeedMult += val; break;
             case SpellStatType.CritChance: upgradeCritChanceBonus += val; break;
-            case SpellStatType.CritDamage: upgradeCritDamageMult *= (1f + val); break;
+            case SpellStatType.CritDamage: upgradeCritDamageMult += val; break;
             case SpellStatType.ProjectileCount: upgradeProjectileCount += flat; break;
         }
     }

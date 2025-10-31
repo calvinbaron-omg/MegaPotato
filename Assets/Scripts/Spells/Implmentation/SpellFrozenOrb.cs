@@ -93,8 +93,6 @@ public class SpellFrozenOrb : BaseProjectileSpell
             case SpellStatType.CritChance: return 0.05f;
             case SpellStatType.CritDamage: return 0.20f;
             case SpellStatType.AttackSpeed: return 0.10f;
-            case SpellStatType.ProjectileCount: return 0f; // each rarity adds 1-2 extra
-            case SpellStatType.ProjectileBounce: return 0f;
             default: return 0f;
         }
     }

@@ -106,6 +106,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             };
             hasSnapshot = true;
         }
+        
     }
 
     // =======================================================
@@ -145,7 +146,26 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
 
     public void ApplyUpgradeAndLevel(List<RolledUpgradeChoice> selectedUpgrades)
     {
-        
+        PlayerStats player = FindObjectOfType<PlayerStats>();
+        if (player != null)
+        {
+            SpellRuntimeStats effective = CalculateEffectiveStats(player);
+            Debug.Log(
+                $"<color=yellow>[{SpellName}] Level {spellLevel}</color>\n" +
+                $"Damage: {effective.damage:F2} | " +
+                $"AtkSpeed: {effective.attackSpeed:F2} | " +
+                $"Crit: {effective.critChance * 100f:F2}% | " +
+                $"Crit Dmg: x{effective.critDamage:F2}\n" +
+                $"Size: {effective.size:F2} | " +
+                $"AOE: {effective.aoe:F2} | " +
+                $"Count: {effective.count:F2} | " +
+                $"Bounces: {effective.bounces:F2}"
+            );
+        }
+        else
+        {
+            Debug.LogWarning($"[{SpellName}] Could not find PlayerStats to calculate final values.");
+        }
         foreach (var upgrade in selectedUpgrades)
         {
             float baseVal = GetBaseUpgradeValue(upgrade.statType);
@@ -158,11 +178,32 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             else
             {
                 float scaledVal = baseVal * RarityHelper.GetMultiplier(upgrade.rarity);
-                ApplyStatUpgrade(upgrade.statType, scaledVal, 0);
+                ApplyStatUpgrade(upgrade.statType, scaledVal, 0f);
             }
-        
-        }  
+            Debug.Log("Upgrading : " + upgrade.statType + " + " + upgrade.effectiveValue);
+        }
         LevelUp();
+        PlayerStats ps = FindObjectOfType<PlayerStats>();
+        if (ps != null)
+        {
+            SpellRuntimeStats effective = CalculateEffectiveStats(ps);
+            Debug.Log(
+                $"<color=yellow>[{SpellName}] Level {spellLevel}</color>\n" +
+                $"Damage: {effective.damage:F2} | " +
+                $"AtkSpeed: {effective.attackSpeed:F2} | " +
+                $"Crit: {effective.critChance * 100f:F2}% | " +
+                $"Crit Dmg: x{effective.critDamage:F2}\n" +
+                $"Size: {effective.size:F2} | " +
+                $"AOE: {effective.aoe:F2} | " +
+                $"Count: {effective.count:F2} | " +
+                $"Bounces: {effective.bounces:F2}"
+            );
+        }
+        else
+        {
+            Debug.LogWarning($"[{SpellName}] Could not find PlayerStats to calculate final values.");
+        }
+
     }
 
     // =======================================================
@@ -187,7 +228,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             {
                 float scaledFlat = RarityHelper.GetFlatProjectileBonus(rolledRarity);
                 string text = SpellUpgradeFormatter.FormatFlatStat(chosen, scaledFlat);
-                results.Add(new RolledUpgradeChoice(chosen, rolledRarity, 0f, text));
+                results.Add(new RolledUpgradeChoice(chosen, rolledRarity, scaledFlat, text));
             }
             else
             {
@@ -219,32 +260,27 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     {
         // 1. Combine base stats with spell's own upgrade multipliers
         float upgradedDamage        = baseDamage * upgradeDamageMult;
-        float upgradedAttackSpeed   = baseAttackSpeed * upgradeAttackSpeedMult;
+        float upgradedAttackSpeed   = baseAttackSpeed + upgradeAttackSpeedMult;
         float upgradedCritChance    = baseCritChance + upgradeCritChanceBonus;
-        float upgradedCritDamage    = baseCritDamage * upgradeCritDamageMult;
+        float upgradedCritDamage    = baseCritDamage + upgradeCritDamageMult;
         float upgradedSize          = baseSize * upgradeSizeMult;
         float upgradedProjectileCount = baseProjectileCount + upgradeProjectileCount;
         float upgradedProjectileBounce = baseProjectileBounce + upgradeProjectileBounce;
         // 2. Apply player global modifiers (from PlayerStats)
         float finalDamage = upgradedDamage * player.GetDamagePercent();
-        float finalAttackSpeed = upgradedAttackSpeed * player.GetAttackSpeed();
+        float finalAttackSpeed = upgradedAttackSpeed + player.GetAttackSpeed();
         float finalCritChance = upgradedCritChance + player.GetCritChance();
-        float finalCritDamage = upgradedCritDamage * player.GetCritDamage();
+        float finalCritDamage = upgradedCritDamage + player.GetCritDamage();
         float finalSize = upgradedSize * player.GetSizeMultiplier();
-
-        float upgradedProcount = upgradedProjectileCount;
-        float playerProcount = player.GetProjectileCount();
         float finalCount = upgradedProjectileCount + player.GetProjectileCount();
         float finalBounces = upgradedProjectileBounce + player.GetProjectileBounce();
-
-
         // 3. Derived stats
         float finalAOE = baseAOE * finalSize;
         float finalProjectileSpeed = baseProjectileSpeed * finalAttackSpeed;
         float finalRange = baseRange * finalSize;
         float finalLifetime = baseLifetime; // lifetime never scales
 
-        return new SpellRuntimeStats(
+       return new SpellRuntimeStats(
             damage: finalDamage,
             attackSpeed: finalAttackSpeed,
             critChance: finalCritChance,

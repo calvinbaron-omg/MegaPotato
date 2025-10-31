@@ -51,7 +51,7 @@ MonoBehaviour:
   baseAttackSpeed: 1
   baseCritChance: 0
   baseCritDamage: 1.5
-  baseSize: 4
+  baseSize: 2
   baseAOE: 1
   baseLifetime: 3
   baseProjectileSpeed: 8
