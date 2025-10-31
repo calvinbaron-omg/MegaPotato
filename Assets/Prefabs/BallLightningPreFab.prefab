@@ -156,19 +156,23 @@ MonoBehaviour:
   description: A ball of lightning
   icon: {fileID: 0}
   baseDamage: 25
-  baseAttackSpeed: 8
+  baseAttackSpeed: 1.25
   baseCritChance: 0
   baseCritDamage: 1.5
   baseSize: 1
   baseAOE: 1
   baseLifetime: 3
-  baseProjectileSpeed: 1
+  baseProjectileSpeed: 9
   baseRange: 8
+  baseProjectileCount: 0
+  baseProjectileBounce: 0
   upgradeDamageMult: 1
   upgradeAttackSpeedMult: 1
   upgradeCritChanceBonus: 0
   upgradeCritDamageMult: 1
   upgradeSizeMult: 1
+  upgradeProjectileBounce: 0
+  upgradeProjectileCount: 0
   spellLevel: 1
   maxLevel: 50
   spellProjectilePrefab: {fileID: 3854896913943547373}

@@ -13,6 +13,9 @@ public struct SpellRuntimeStats
     public float projectileSpeed;
     public float range;
     public float lifetime;
+    public float count;
+    public float bounces;
+
 
     public SpellRuntimeStats(
         float damage,
@@ -23,7 +26,10 @@ public struct SpellRuntimeStats
         float aoe,
         float projectileSpeed,
         float range,
-        float lifetime
+        float lifetime,
+        float count,
+        float bounces
+
     )
     {
         this.damage = damage;
@@ -35,5 +41,7 @@ public struct SpellRuntimeStats
         this.projectileSpeed = projectileSpeed;
         this.range = range;
         this.lifetime = lifetime;
+        this.count = count;
+        this.bounces = bounces;
     }
 }

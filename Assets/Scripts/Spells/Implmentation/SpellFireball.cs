@@ -24,21 +24,45 @@ public class SpellFireball : BaseProjectileSpell
         Vector3 end = targetPosition + Vector3.up * heightOffset;
         Vector3 dir = (end - start).normalized;
 
-        GameObject fireball = CreateProjectile(caster, dir, heightOffset);
-        FireballBehavior behavior = fireball.AddComponent<FireballBehavior>();
+        // 🔹 Calculate projectile spread pattern
+        int projectileCount = Mathf.Max(1, Mathf.FloorToInt(effective.count));
+        float baseAngle = 0f;
+        float angleStep = 10f; // Fireballs spread wider visually
 
-        behavior.Initialize(
-            dir,
-            effective.projectileSpeed,
-            effective.lifetime,
-            effective.damage,
-            burnChance,
-            burnDamage,
-            burnDuration,
-            effective.aoe,
-            effective.critChance,
-            effective.critDamage
-        );
+        for (int i = 0; i < projectileCount; i++)
+        {
+            float angleOffset;
+            if (i == 0)
+            {
+                angleOffset = baseAngle; // First fires straight
+            }
+            else
+            {
+                int pairIndex = (i + 1) / 2;
+                angleOffset = pairIndex * angleStep * (i % 2 == 0 ? -1 : 1);
+            }
+
+            Vector3 spreadDir = Quaternion.Euler(0, angleOffset, 0) * dir;
+
+            GameObject projectile = CreateProjectile(caster, spreadDir, heightOffset);
+            FireballBehavior behavior = projectile.AddComponent<FireballBehavior>();
+
+            behavior.Initialize(
+                spreadDir,
+                effective.projectileSpeed,
+                effective.lifetime,
+                effective.damage,
+                burnChance,
+                burnDamage,
+                burnDuration,
+                effective.aoe,
+                effective.critChance,
+                effective.critDamage,
+                effective.bounces,
+                effective.count
+
+            );
+        }
     }
 
     public override List<SpellStatType> GetUpgradeableStats() =>
@@ -47,7 +71,9 @@ public class SpellFireball : BaseProjectileSpell
             SpellStatType.Size,
             SpellStatType.CritChance,
             SpellStatType.CritDamage,
-            SpellStatType.AttackSpeed
+            SpellStatType.AttackSpeed,
+            SpellStatType.ProjectileCount,
+            SpellStatType.ProjectileBounce
         };
 
     public override float GetBaseUpgradeValue(SpellStatType statType)
@@ -59,11 +85,23 @@ public class SpellFireball : BaseProjectileSpell
             case SpellStatType.CritChance: return 0.05f;
             case SpellStatType.CritDamage: return 0.20f;
             case SpellStatType.AttackSpeed: return 0.10f;
+            case SpellStatType.ProjectileCount: return 1f; // each rarity adds 1-2 extra
+            case SpellStatType.ProjectileBounce: return 1f;
             default: return 0f;
         }
     }
 
-    public override void ApplyStatUpgrade(SpellStatType statType, float val, int flat = 0)
+    public override (bool isFlat, int flatAmount) GetFlatUpgradeInfo(SpellStatType statType)
+    {
+        switch (statType)
+        {
+            case SpellStatType.ProjectileCount: return (true, 1);
+            case SpellStatType.ProjectileBounce: return (true, 1);
+            default: return base.GetFlatUpgradeInfo(statType);
+        }
+    }
+
+    public override void ApplyStatUpgrade(SpellStatType statType, float val, float flat = 0)
     {
         switch (statType)
         {
@@ -72,6 +110,9 @@ public class SpellFireball : BaseProjectileSpell
             case SpellStatType.CritChance: upgradeCritChanceBonus += val; break;
             case SpellStatType.CritDamage: upgradeCritDamageMult *= (1f + val); break;
             case SpellStatType.AttackSpeed: upgradeAttackSpeedMult *= (1f + val); break;
+            case SpellStatType.ProjectileCount: upgradeProjectileCount += flat; break;
+            case SpellStatType.ProjectileBounce: upgradeProjectileBounce += flat; break;
         }
     }
+
 }

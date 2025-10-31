@@ -206,4 +206,10 @@ public class PlayerAutoAttack : MonoBehaviour
         maxEquippedSpells = Mathf.Max(1, newMax);
         Debug.Log($"Max equipped spells updated to {maxEquippedSpells}");
     }
+    public void RunSpellCoroutine(System.Collections.IEnumerator coroutine)
+    {
+        StartCoroutine(coroutine);
+    }
+
+
 }

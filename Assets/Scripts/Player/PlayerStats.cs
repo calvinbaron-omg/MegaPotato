@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEngine.Rendering;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float baseCritChance = 0.05f;           // 5% base crit chance
     [SerializeField] private float baseCritDamage = 1.5f;            // 150% crit damage
     [SerializeField] private float baseSizeMultiplier = 1.0f;        // Projectile size/AoE multiplier
+    [SerializeField] private float baseProjectileCount = 0.0f;       // Extra projectiles
+    [SerializeField] private float baseProjectileBounce = 0.0f;      //Extra bounces
 
     [Header("Base Combat Stats")]
     [SerializeField] private float baseLifeSteal = 0f;               // %
@@ -57,6 +60,9 @@ public class PlayerStats : MonoBehaviour
     private float bonusCritDamage = 0f;
     private float bonusSize = 0f;
 
+    private float bonusProjectileCount = 0f;
+    private float bonusProjectileBounce = 0f;
+
     private float bonusLifeSteal = 0f;
     private float bonusArmor = 0f;
     private float bonusEvasion = 0f;
@@ -82,6 +88,9 @@ public class PlayerStats : MonoBehaviour
     public void AddCritChanceBonus(float percent) { bonusCritChance += percent; NotifyStatsChanged(); }
     public void AddCritDamageBonus(float percent) { bonusCritDamage += percent; NotifyStatsChanged(); }
     public void AddSizeBonus(float percent) { bonusSize += percent; NotifyStatsChanged(); }
+
+    public void AddProjectileCount(float amount) { bonusProjectileCount += amount; }
+    public void AddProjectileBounce(float amount) { bonusProjectileBounce += amount;}
 
     public void AddLifeSteal(float percent) { bonusLifeSteal += percent; NotifyStatsChanged(); }
     public void AddArmor(float percent) { bonusArmor += percent; NotifyStatsChanged(); }
@@ -110,6 +119,9 @@ public class PlayerStats : MonoBehaviour
     public float GetCritChance() => baseCritChance + bonusCritChance;
     public float GetCritDamage() => baseCritDamage * (1f + bonusCritDamage);
     public float GetSizeMultiplier() => baseSizeMultiplier * (1f + bonusSize);
+
+    public float GetProjectileCount() => baseProjectileCount + bonusProjectileCount;
+    public float GetProjectileBounce() => baseProjectileBounce + bonusProjectileBounce;
 
     // Combat
     public float GetLifeSteal() => baseLifeSteal + bonusLifeSteal;
@@ -143,7 +155,8 @@ public class PlayerStats : MonoBehaviour
         bonusCritChance = 0f;
         bonusCritDamage = 0f;
         bonusSize = 0f;
-
+        bonusProjectileBounce = 0f;
+        bonusProjectileCount = 0f;
         bonusLifeSteal = 0f;
         bonusArmor = 0f;
         bonusEvasion = 0f;

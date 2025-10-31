@@ -20,6 +20,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     [SerializeField] protected float baseLifetime = 3f;
     [SerializeField] protected float baseProjectileSpeed = 8f;
     [SerializeField] protected float baseRange = 8f;
+    [SerializeField] protected float baseProjectileCount = 0f;
+    [SerializeField] protected float baseProjectileBounce = 0f;
 
     [Header("Spell Upgrades")]
     [SerializeField] protected float upgradeDamageMult = 1f;
@@ -27,6 +29,9 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     [SerializeField] protected float upgradeCritChanceBonus = 0f;
     [SerializeField] protected float upgradeCritDamageMult = 1f;
     [SerializeField] protected float upgradeSizeMult = 1f;
+    [SerializeField] protected float upgradeProjectileBounce = 0f;
+    [SerializeField] protected float upgradeProjectileCount = 0f;
+
 
     [Header("Progression")]
     [SerializeField] protected int spellLevel = 1;
@@ -57,6 +62,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         public float baseAOE;
         public int spellLevel;
         public float baseRange;
+        public float baseProjectileCount;
+        public float baseProjectileBounce;
     }
 
     private SpellDefaults snapshot;
@@ -94,6 +101,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
                 baseAOE = baseAOE,
                 spellLevel = 1,
                 baseRange = baseRange,
+                baseProjectileBounce = baseProjectileBounce,
+                baseProjectileCount = baseProjectileCount,
             };
             hasSnapshot = true;
         }
@@ -113,6 +122,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         upgradeCritChanceBonus = 0f;
         upgradeCritDamageMult = 1f;
         upgradeSizeMult = 1f;
+        upgradeProjectileBounce = 0f;
+        upgradeProjectileCount = 0;
     }
 
 
@@ -130,7 +141,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     public abstract List<SpellStatType> GetUpgradeableStats();
     public abstract float GetBaseUpgradeValue(SpellStatType statType);
     public virtual (bool isFlat, int flatAmount) GetFlatUpgradeInfo(SpellStatType statType) => (false, 0);
-    public abstract void ApplyStatUpgrade(SpellStatType statType, float effectiveValue, int flatAmountIfAny = 0);
+    public abstract void ApplyStatUpgrade(SpellStatType statType, float effectiveValue, float flatAmountIfAny = 0);
 
     public void ApplyUpgradeAndLevel(List<RolledUpgradeChoice> selectedUpgrades)
     {
@@ -141,7 +152,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             (bool isFlat, int flatAmt) = GetFlatUpgradeInfo(upgrade.statType);
             if (isFlat)
             {
-                int scaledFlat = Mathf.RoundToInt(flatAmt * RarityHelper.GetMultiplier(upgrade.rarity));
+                float scaledFlat = RarityHelper.GetFlatProjectileBonus(upgrade.rarity);
                 ApplyStatUpgrade(upgrade.statType, 0f, scaledFlat);
             }
             else
@@ -174,7 +185,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             (bool isFlat, int flatAmt) = GetFlatUpgradeInfo(chosen);
             if (isFlat)
             {
-                int scaledFlat = Mathf.RoundToInt(flatAmt * RarityHelper.GetMultiplier(rolledRarity));
+                float scaledFlat = RarityHelper.GetFlatProjectileBonus(rolledRarity);
                 string text = SpellUpgradeFormatter.FormatFlatStat(chosen, scaledFlat);
                 results.Add(new RolledUpgradeChoice(chosen, rolledRarity, 0f, text));
             }
@@ -212,13 +223,20 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         float upgradedCritChance    = baseCritChance + upgradeCritChanceBonus;
         float upgradedCritDamage    = baseCritDamage * upgradeCritDamageMult;
         float upgradedSize          = baseSize * upgradeSizeMult;
-
+        float upgradedProjectileCount = baseProjectileCount + upgradeProjectileCount;
+        float upgradedProjectileBounce = baseProjectileBounce + upgradeProjectileBounce;
         // 2. Apply player global modifiers (from PlayerStats)
         float finalDamage = upgradedDamage * player.GetDamagePercent();
         float finalAttackSpeed = upgradedAttackSpeed * player.GetAttackSpeed();
         float finalCritChance = upgradedCritChance + player.GetCritChance();
         float finalCritDamage = upgradedCritDamage * player.GetCritDamage();
         float finalSize = upgradedSize * player.GetSizeMultiplier();
+
+        float upgradedProcount = upgradedProjectileCount;
+        float playerProcount = player.GetProjectileCount();
+        float finalCount = upgradedProjectileCount + player.GetProjectileCount();
+        float finalBounces = upgradedProjectileBounce + player.GetProjectileBounce();
+
 
         // 3. Derived stats
         float finalAOE = baseAOE * finalSize;
@@ -235,7 +253,9 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             aoe: finalAOE,
             projectileSpeed: finalProjectileSpeed,
             range: finalRange,
-            lifetime: finalLifetime
+            lifetime: finalLifetime,
+            count: finalCount,
+            bounces: finalBounces
         );
     }
 
@@ -267,13 +287,16 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         if (proj.GetComponent<Collider>() == null)
         {
             SphereCollider col = proj.AddComponent<SphereCollider>();
-            col.isTrigger = true;
+            col.isTrigger = false; 
         }
 
         if (proj.GetComponent<Rigidbody>() == null)
         {
             Rigidbody rb = proj.AddComponent<Rigidbody>();
             rb.useGravity = false;
+            rb.isKinematic = false;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
+
     }
 }

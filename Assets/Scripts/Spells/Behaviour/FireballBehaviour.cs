@@ -13,6 +13,10 @@ public class FireballBehavior : MonoBehaviour
     private float critChance;
     private float critDamageMultiplier;
 
+    private float extraProjBounce;
+    private float extraProjCount;
+    private float remainingBounces;
+
     public void Initialize(
         Vector3 direction,
         float spd,
@@ -22,8 +26,10 @@ public class FireballBehavior : MonoBehaviour
         float burnDmg,
         float burnDur,
         float aoeRad,
-        float critCh = 0f,
-        float critMult = 1f
+        float critCh,
+        float critMult,
+        float projBounce,
+        float projCount
     )
     {
         moveDirection = direction.normalized;
@@ -36,6 +42,9 @@ public class FireballBehavior : MonoBehaviour
         aoeRadius = aoeRad;
         critChance = critCh;
         critDamageMultiplier = critMult;
+        extraProjBounce = Mathf.FloorToInt(projBounce);
+        extraProjCount = projCount;
+        remainingBounces = extraProjBounce;
 
         Destroy(gameObject, lifetime);
     }
@@ -45,14 +54,31 @@ public class FireballBehavior : MonoBehaviour
         transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
-    void OnTriggerEnter(Collider other)
+    void OnCollisionEnter(Collision collision)
     {
-        if (other.CompareTag("Projectile") || other.CompareTag("Player")) return;
+        if (collision.collider.CompareTag("Player") || collision.collider.CompareTag("Projectile"))
+            return;
 
-        if (other.CompareTag("Enemy"))
+        if (collision.collider.CompareTag("Enemy"))
         {
             ApplyDamage();
-            Destroy(gameObject);
+
+            if (remainingBounces <= 0)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            remainingBounces--;
+            moveDirection = Vector3.Reflect(moveDirection, collision.contacts[0].normal);
+            return;
+        }
+
+        // Hit wall / environment
+        if (remainingBounces > 0)
+        {
+            remainingBounces--;
+            moveDirection = Vector3.Reflect(moveDirection, collision.contacts[0].normal);
         }
         else
         {
@@ -77,6 +103,7 @@ public class FireballBehavior : MonoBehaviour
 
             health.TakeDamage(damage, isCrit);
 
+            // 🔥 Apply burn effect
             if (Random.value <= burnChance)
             {
                 EnemyStatus status = enemy.GetComponent<EnemyStatus>();
