@@ -13,6 +13,10 @@ public class BallLightningBehavior : MonoBehaviour
     private float critChance;
     private float critDamageMultiplier;
 
+    private float extraProjBounce;
+    private float extraProjCount;
+    private float remainingBounces;
+
     public void Initialize(
         Vector3 direction,
         float spd,
@@ -22,8 +26,10 @@ public class BallLightningBehavior : MonoBehaviour
         float shockAmt,
         float shockDur,
         float aoeRad,
-        float critCh = 0f,
-        float critMult = 1f
+        float critCh,
+        float critMult,
+        float projBounce,
+        float projCount
     )
     {
         moveDirection = direction.normalized;
@@ -36,6 +42,9 @@ public class BallLightningBehavior : MonoBehaviour
         aoeRadius = aoeRad;
         critChance = critCh;
         critDamageMultiplier = critMult;
+        extraProjBounce = Mathf.FloorToInt(projBounce);
+        extraProjCount = projCount;
+        remainingBounces = extraProjBounce;
 
         Destroy(gameObject, lifetime);
     }
@@ -45,14 +54,36 @@ public class BallLightningBehavior : MonoBehaviour
         transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
-    void OnTriggerEnter(Collider other)
+    void OnCollisionEnter(Collision collision)
     {
-        if (other.CompareTag("Projectile") || other.CompareTag("Player")) return;
+        if (collision.collider.CompareTag("Player") || collision.collider.CompareTag("Projectile"))
+            return;
 
-        if (other.CompareTag("Enemy"))
+        if (collision.collider.CompareTag("Enemy"))
         {
             ApplyDamage();
-            Destroy(gameObject);
+
+            if (remainingBounces <= 0)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            remainingBounces--;
+            // ⚡ Add slight random deviation for chaotic bounce
+            Vector3 normal = collision.contacts[0].normal;
+            moveDirection = Vector3.Reflect(moveDirection, normal);
+            moveDirection = Quaternion.Euler(0, Random.Range(-15f, 15f), 0) * moveDirection;
+            return;
+        }
+
+        // Hit environment / walls
+        if (remainingBounces > 0)
+        {
+            remainingBounces--;
+            Vector3 normal = collision.contacts[0].normal;
+            moveDirection = Vector3.Reflect(moveDirection, normal);
+            moveDirection = Quaternion.Euler(0, Random.Range(-10f, 10f), 0) * moveDirection;
         }
         else
         {
@@ -77,7 +108,7 @@ public class BallLightningBehavior : MonoBehaviour
 
             health.TakeDamage(damage, isCrit);
 
-            // Shock (stun/slow)
+            // ⚡ Shock effect (slow or stun)
             if (Random.value <= shockChance)
             {
                 EnemyStatus status = enemy.GetComponent<EnemyStatus>();

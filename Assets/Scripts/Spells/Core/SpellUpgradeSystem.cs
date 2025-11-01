@@ -39,6 +39,20 @@ public static class RarityHelper
         if (roll < 0.99f) return Rarity.Epic;
         return Rarity.Legendary;
     }
+    public static float GetFlatProjectileBonus(Rarity rarity)
+    {
+        // Scales projectiles/bounces roughly as:
+        // Common +0.5, Uncommon +1, Rare +1.5, Epic +2, Legendary +2.5
+        switch (rarity)
+        {
+            case Rarity.Uncommon:  return 1f;
+            case Rarity.Rare:      return 1.5f;
+            case Rarity.Epic:      return 2f;
+            case Rarity.Legendary: return 2.5f;
+            default:               return 0.5f;
+        }
+    }
+
 }
 
 // Which stat are we upgrading?
@@ -89,7 +103,7 @@ public static class SpellUpgradeFormatter
             case SpellStatType.ProjectileSpeed:
                 return $"Projectile Speed +{percent}%";
             case SpellStatType.Size:
-                return $"Size / AoE Radius +{percent}%";
+                return $"Size +{percent}%";
             case SpellStatType.CritChance:
                 return $"Crit Chance +{percent}%";
             case SpellStatType.CritDamage:
@@ -98,24 +112,24 @@ public static class SpellUpgradeFormatter
                 return $"Attack Speed +{percent}%";
             //Keeping these here at placeholders, because it should be in int but maybe not, we can do something like +120% prjectile amount, then do a math.floor when calculating the number of projectiles getting fired.
             //So at the end number of proectiles = 2.2 = 2; And we bisuall say number of prokectiles for 80% be ProjectileCount +80% = 0.8. Same with bounces
-            case SpellStatType.ProjectileCount:
-                return $"Extra Projectiles +{percent}%";
-            case SpellStatType.ProjectileBounce:
-                return $"Extra Bounces +{percent}%";
+            // case SpellStatType.ProjectileCount:
+            //     return $"Extra Projectiles +{percent}%";
+            // case SpellStatType.ProjectileBounce:
+            //     return $"Extra Bounces +{percent}%";
             default:
                 return $"{statType} +{percent}%";
         }
     }
 
     // For flat integer-like buffs (ProjectileCount +1)
-    public static string FormatFlatStat(SpellStatType statType, int flatAmount)
+    public static string FormatFlatStat(SpellStatType statType, float flatAmount)
     {
         switch (statType)
         {
             case SpellStatType.ProjectileCount:
-                return $"+{flatAmount} Projectile";
+                return $"+{flatAmount} Projectiles";
             case SpellStatType.ProjectileBounce:
-                return $"+{flatAmount} Projectile";
+                return $"+{flatAmount} Bounces";
             default:
                 return $"{statType} +{flatAmount}";
         }

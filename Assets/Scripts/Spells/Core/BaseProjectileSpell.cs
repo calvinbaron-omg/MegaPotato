@@ -20,6 +20,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     [SerializeField] protected float baseLifetime = 3f;
     [SerializeField] protected float baseProjectileSpeed = 8f;
     [SerializeField] protected float baseRange = 8f;
+    [SerializeField] protected float baseProjectileCount = 0f;
+    [SerializeField] protected float baseProjectileBounce = 0f;
 
     [Header("Spell Upgrades")]
     [SerializeField] protected float upgradeDamageMult = 1f;
@@ -27,6 +29,9 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     [SerializeField] protected float upgradeCritChanceBonus = 0f;
     [SerializeField] protected float upgradeCritDamageMult = 1f;
     [SerializeField] protected float upgradeSizeMult = 1f;
+    [SerializeField] protected float upgradeProjectileBounce = 0f;
+    [SerializeField] protected float upgradeProjectileCount = 0f;
+
 
     [Header("Progression")]
     [SerializeField] protected int spellLevel = 1;
@@ -57,6 +62,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         public float baseAOE;
         public int spellLevel;
         public float baseRange;
+        public float baseProjectileCount;
+        public float baseProjectileBounce;
     }
 
     private SpellDefaults snapshot;
@@ -94,9 +101,12 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
                 baseAOE = baseAOE,
                 spellLevel = 1,
                 baseRange = baseRange,
+                baseProjectileBounce = baseProjectileBounce,
+                baseProjectileCount = baseProjectileCount,
             };
             hasSnapshot = true;
         }
+        
     }
 
     // =======================================================
@@ -113,6 +123,8 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         upgradeCritChanceBonus = 0f;
         upgradeCritDamageMult = 1f;
         upgradeSizeMult = 1f;
+        upgradeProjectileBounce = 0f;
+        upgradeProjectileCount = 0;
     }
 
 
@@ -130,28 +142,68 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     public abstract List<SpellStatType> GetUpgradeableStats();
     public abstract float GetBaseUpgradeValue(SpellStatType statType);
     public virtual (bool isFlat, int flatAmount) GetFlatUpgradeInfo(SpellStatType statType) => (false, 0);
-    public abstract void ApplyStatUpgrade(SpellStatType statType, float effectiveValue, int flatAmountIfAny = 0);
+    public abstract void ApplyStatUpgrade(SpellStatType statType, float effectiveValue, float flatAmountIfAny = 0);
 
     public void ApplyUpgradeAndLevel(List<RolledUpgradeChoice> selectedUpgrades)
     {
-        
+        PlayerStats player = FindObjectOfType<PlayerStats>();
+        if (player != null)
+        {
+            SpellRuntimeStats effective = CalculateEffectiveStats(player);
+            Debug.Log(
+                $"<color=yellow>[{SpellName}] Level {spellLevel}</color>\n" +
+                $"Damage: {effective.damage:F2} | " +
+                $"AtkSpeed: {effective.attackSpeed:F2} | " +
+                $"Crit: {effective.critChance * 100f:F2}% | " +
+                $"Crit Dmg: x{effective.critDamage:F2}\n" +
+                $"Size: {effective.size:F2} | " +
+                $"AOE: {effective.aoe:F2} | " +
+                $"Count: {effective.count:F2} | " +
+                $"Bounces: {effective.bounces:F2}"
+            );
+        }
+        else
+        {
+            Debug.LogWarning($"[{SpellName}] Could not find PlayerStats to calculate final values.");
+        }
         foreach (var upgrade in selectedUpgrades)
         {
             float baseVal = GetBaseUpgradeValue(upgrade.statType);
             (bool isFlat, int flatAmt) = GetFlatUpgradeInfo(upgrade.statType);
             if (isFlat)
             {
-                int scaledFlat = Mathf.RoundToInt(flatAmt * RarityHelper.GetMultiplier(upgrade.rarity));
+                float scaledFlat = RarityHelper.GetFlatProjectileBonus(upgrade.rarity);
                 ApplyStatUpgrade(upgrade.statType, 0f, scaledFlat);
             }
             else
             {
                 float scaledVal = baseVal * RarityHelper.GetMultiplier(upgrade.rarity);
-                ApplyStatUpgrade(upgrade.statType, scaledVal, 0);
+                ApplyStatUpgrade(upgrade.statType, scaledVal, 0f);
             }
-        
-        }  
+            Debug.Log("Upgrading : " + upgrade.statType + " + " + upgrade.effectiveValue);
+        }
         LevelUp();
+        PlayerStats ps = FindObjectOfType<PlayerStats>();
+        if (ps != null)
+        {
+            SpellRuntimeStats effective = CalculateEffectiveStats(ps);
+            Debug.Log(
+                $"<color=yellow>[{SpellName}] Level {spellLevel}</color>\n" +
+                $"Damage: {effective.damage:F2} | " +
+                $"AtkSpeed: {effective.attackSpeed:F2} | " +
+                $"Crit: {effective.critChance * 100f:F2}% | " +
+                $"Crit Dmg: x{effective.critDamage:F2}\n" +
+                $"Size: {effective.size:F2} | " +
+                $"AOE: {effective.aoe:F2} | " +
+                $"Count: {effective.count:F2} | " +
+                $"Bounces: {effective.bounces:F2}"
+            );
+        }
+        else
+        {
+            Debug.LogWarning($"[{SpellName}] Could not find PlayerStats to calculate final values.");
+        }
+
     }
 
     // =======================================================
@@ -174,9 +226,9 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             (bool isFlat, int flatAmt) = GetFlatUpgradeInfo(chosen);
             if (isFlat)
             {
-                int scaledFlat = Mathf.RoundToInt(flatAmt * RarityHelper.GetMultiplier(rolledRarity));
+                float scaledFlat = RarityHelper.GetFlatProjectileBonus(rolledRarity);
                 string text = SpellUpgradeFormatter.FormatFlatStat(chosen, scaledFlat);
-                results.Add(new RolledUpgradeChoice(chosen, rolledRarity, 0f, text));
+                results.Add(new RolledUpgradeChoice(chosen, rolledRarity, scaledFlat, text));
             }
             else
             {
@@ -208,25 +260,27 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     {
         // 1. Combine base stats with spell's own upgrade multipliers
         float upgradedDamage        = baseDamage * upgradeDamageMult;
-        float upgradedAttackSpeed   = baseAttackSpeed * upgradeAttackSpeedMult;
+        float upgradedAttackSpeed   = baseAttackSpeed + upgradeAttackSpeedMult;
         float upgradedCritChance    = baseCritChance + upgradeCritChanceBonus;
-        float upgradedCritDamage    = baseCritDamage * upgradeCritDamageMult;
+        float upgradedCritDamage    = baseCritDamage + upgradeCritDamageMult;
         float upgradedSize          = baseSize * upgradeSizeMult;
-
+        float upgradedProjectileCount = baseProjectileCount + upgradeProjectileCount;
+        float upgradedProjectileBounce = baseProjectileBounce + upgradeProjectileBounce;
         // 2. Apply player global modifiers (from PlayerStats)
         float finalDamage = upgradedDamage * player.GetDamagePercent();
-        float finalAttackSpeed = upgradedAttackSpeed * player.GetAttackSpeed();
+        float finalAttackSpeed = upgradedAttackSpeed + player.GetAttackSpeed();
         float finalCritChance = upgradedCritChance + player.GetCritChance();
-        float finalCritDamage = upgradedCritDamage * player.GetCritDamage();
+        float finalCritDamage = upgradedCritDamage + player.GetCritDamage();
         float finalSize = upgradedSize * player.GetSizeMultiplier();
-
+        float finalCount = upgradedProjectileCount + player.GetProjectileCount();
+        float finalBounces = upgradedProjectileBounce + player.GetProjectileBounce();
         // 3. Derived stats
         float finalAOE = baseAOE * finalSize;
         float finalProjectileSpeed = baseProjectileSpeed * finalAttackSpeed;
         float finalRange = baseRange * finalSize;
         float finalLifetime = baseLifetime; // lifetime never scales
 
-        return new SpellRuntimeStats(
+       return new SpellRuntimeStats(
             damage: finalDamage,
             attackSpeed: finalAttackSpeed,
             critChance: finalCritChance,
@@ -235,7 +289,9 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             aoe: finalAOE,
             projectileSpeed: finalProjectileSpeed,
             range: finalRange,
-            lifetime: finalLifetime
+            lifetime: finalLifetime,
+            count: finalCount,
+            bounces: finalBounces
         );
     }
 
@@ -267,13 +323,16 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
         if (proj.GetComponent<Collider>() == null)
         {
             SphereCollider col = proj.AddComponent<SphereCollider>();
-            col.isTrigger = true;
+            col.isTrigger = false; 
         }
 
         if (proj.GetComponent<Rigidbody>() == null)
         {
             Rigidbody rb = proj.AddComponent<Rigidbody>();
             rb.useGravity = false;
+            rb.isKinematic = false;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
+
     }
 }
