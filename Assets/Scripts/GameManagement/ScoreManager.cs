@@ -3,22 +3,40 @@ using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
-    public TMP_Text timeSurvivedText;    // UI Text element to display score
-    public TMP_Text enemiesKilledText;
-    private float timer = 0f;     // Time survived in seconds
+    public TMP_Text timeSurvivedText;    // UI Text element to display time
+    public TMP_Text enemiesKilledText;   // UI Text element to display kills
+
+    private float timer = 600f;          // Start at 10 minutes (600 seconds)
+    private bool isCountingDown = true;  // Starts by counting down
     private bool isGameOver = false;
-    private int enemyKills = 0;   // Total number of enemies defeated
+    private int enemyKills = 0;
 
     void Update()
     {
-        // Only update timer if game is still active
         if (isGameOver) return;
 
-        timer += Time.deltaTime;
+        if (isCountingDown)
+        {
+            timer -= Time.deltaTime;
+            if (timer <= 0f)
+            {
+                timer = 0f;
+                isCountingDown = false;
+
+                // 🔹 Tell EnemyScalingManager to switch to overtime mode
+                if (EnemyScalingManager.Instance != null)
+                    EnemyScalingManager.Instance.SetOvertime(true);
+            }
+        }
+        else
+        {
+            timer += Time.deltaTime;
+        }
+
         UpdateScoreDisplay();
     }
 
-    // Call this when an enemy dies to increment kill count
+
     public void AddKill()
     {
         enemyKills++;
@@ -27,39 +45,32 @@ public class ScoreManager : MonoBehaviour
 
     private void UpdateScoreDisplay()
     {
-        // Update UI with current time survived and kill count
         if (timeSurvivedText != null && enemiesKilledText != null)
         {
-            int secondsSurvived = Mathf.FloorToInt(timer);
-            timeSurvivedText.text = $"Time: {secondsSurvived}s";
+            int minutes = Mathf.FloorToInt(timer / 60);
+            int seconds = Mathf.FloorToInt(timer % 60);
+            string timeString = $"{minutes:00}:{seconds:00}";
+
+            // Indicate whether we’re counting down or up
+            string prefix = isCountingDown ? "Countdown" : "Overtime";
+
+            timeSurvivedText.text = $"{prefix}: {timeString}";
             enemiesKilledText.text = $"Kills: {enemyKills}";
         }
     }
 
-    // Call this when game ends to stop timer
-    public void StopTimer()
-    {
-        isGameOver = true;
-    }
+    public void StopTimer() => isGameOver = true;
 
-    // Call this when restarting game to reset stats
     public void ResetTimer()
     {
-        timer = 0f;
+        timer = 600f;           // Reset back to 10 minutes
+        isCountingDown = true;  // Start counting down again
         enemyKills = 0;
         isGameOver = false;
         UpdateScoreDisplay();
     }
 
-    // Get current kill count (for game over screen or achievements)
-    public int GetKills()
-    {
-        return enemyKills;
-    }
+    public int GetKills() => enemyKills;
 
-    // Get time survived in seconds (for game over screen or high scores)
-    public float GetTimeSurvived()
-    {
-        return timer;
-    }
+    public float GetTimeSurvived() => timer;
 }

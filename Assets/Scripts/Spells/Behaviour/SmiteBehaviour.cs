@@ -3,32 +3,32 @@ using System.Collections;
 
 public class SmiteBehavior : MonoBehaviour
 {
-    //TODO Acutally make meta unlocks
-    [Header("Meta Unlock")]
     private bool allowOverflowDamage = false;
     private float aoeDamage;
     private float aoeRadius;
     private float critChance;
     private float critDamage;
     private int pulseCount = 1;
-    private float pulseDelay = 0.05f; // delay between AoE pulses
-
+    private float pulseDelay = 0.05f;
     [SerializeField] private float lifetime = 0.6f;
     private float fadeSpeed = 3f;
     private Material mat;
     private Color startColor;
+    private GameObject prefabRef;
 
-    public void Initialize(float dmg, float radius, float critCh, float critMult, int projectiles = 1)
+    public void Initialize(float dmg, float radius, float critCh, float critMult, int projectiles = 1, GameObject prefabReference = null)
     {
         aoeDamage = dmg;
         aoeRadius = radius;
         critChance = critCh;
         critDamage = critMult;
         pulseCount = Mathf.Max(1, projectiles);
+        prefabRef = prefabReference;
 
         mat = GetComponent<MeshRenderer>()?.material;
         if (mat != null) startColor = mat.color;
 
+        StopAllCoroutines();
         StartCoroutine(DoSmitePulses());
     }
 
@@ -39,15 +39,13 @@ public class SmiteBehavior : MonoBehaviour
             ApplyAoEDamage();
 
             if (mat != null)
-            {
-                // brief flash for each pulse
                 mat.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
-            }
 
             yield return new WaitForSeconds(pulseDelay);
         }
 
-        Destroy(gameObject, lifetime);
+        yield return new WaitForSeconds(lifetime);
+        ProjectilePool.Instance.Return(prefabRef, gameObject);
     }
 
     private void Update()
@@ -69,26 +67,21 @@ public class SmiteBehavior : MonoBehaviour
             if (health == null) continue;
 
             float dmg = aoeDamage;
-
-            // MEGA BONK
-            float remainingChance = critChance;   // e.g. 1.10f for 110%
-            int guaranteedCrits = Mathf.FloorToInt(remainingChance); // every full 100% = guaranteed
+            float remainingChance = critChance;
+            int guaranteedCrits = Mathf.FloorToInt(remainingChance);
             float extraChance = remainingChance - guaranteedCrits;
-            //Dont allow more than 20 mega bonks
-            if(guaranteedCrits >= 20 && allowOverflowDamage == false)
-            {
+
+            if (guaranteedCrits >= 20 && !allowOverflowDamage)
                 guaranteedCrits = 20;
-            }
-            // Apply guaranteed crit layers
+
             for (int i = 0; i < guaranteedCrits; i++)
                 dmg *= critDamage;
 
-            // Roll one more time for the fractional part
             if (Random.value < extraChance)
                 dmg *= critDamage;
-            // Pass in whether we crit at least once (for visuals)
+
             bool isCrit = (guaranteedCrits > 0) || (Random.value < extraChance);
-            health.TakeDamage(dmg, isCrit);
+            health.TakeDamage(dmg, isCrit, "Smite");
         }
     }
 

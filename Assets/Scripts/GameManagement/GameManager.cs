@@ -1,105 +1,116 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public TMPro.TMP_Text gameOverText;
+    public TMP_Text gameOverText;
+    public GameObject damageMeterPanel; // Assign a Canvas or Panel prefab in Inspector
+    public TMP_Text damageMeterText;    // Text inside the panel for displaying stats
+
+    private bool isPaused = false;
 
     public void GameOver()
     {
-        // Pause game and show game over UI
         Time.timeScale = 0;
 
         if (gameOverText != null)
             gameOverText.gameObject.SetActive(true);
 
-        // Stop score timer
-        ScoreManager scoreManager = FindAnyObjectByType<ScoreManager>();
-        if (scoreManager != null)
-        {
-            scoreManager.StopTimer();
-        }
+        var scoreManager = FindAnyObjectByType<ScoreManager>();
+        scoreManager?.StopTimer();
 
-        //Handle run end for currency
-        PlayerCurrency playerCurrency = FindAnyObjectByType<PlayerCurrency>();
-        if (playerCurrency != null)
-        {
-            playerCurrency.OnRunEnd();
-        }
+        var playerCurrency = FindAnyObjectByType<PlayerCurrency>();
+        playerCurrency?.OnRunEnd();
     }
 
     void Update()
     {
-        // Restart game when R key is pressed
+        // 🔹 Restart shortcut
         if (Input.GetKeyDown(KeyCode.R))
-        {
             RestartGame();
+
+        // 🔹 Pause / Resume on ESC
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!isPaused)
+                PauseGameAndShowDamageMeter();
+            else
+                ResumeGame();
         }
+    }
+
+    private void PauseGameAndShowDamageMeter()
+    {
+        isPaused = true;
+        Time.timeScale = 0;
+
+        // Build the damage meter summary once
+        if (damageMeterPanel != null)
+            damageMeterPanel.SetActive(true);
+
+        if (damageMeterText != null && DamageTracker.Instance != null)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("<b>Damage Summary</b>\n");
+
+            foreach (var (src, total, dps) in DamageTracker.Instance.GetAll())
+            {
+                sb.AppendLine($"{src,-15}  {total,8:F0} dmg  |  {dps,6:F1} DPS");
+            }
+
+            damageMeterText.text = sb.ToString();
+        }
+    }
+
+    private void ResumeGame()
+    {
+        isPaused = false;
+        Time.timeScale = 1;
+
+        if (damageMeterPanel != null)
+            damageMeterPanel.SetActive(false);
     }
 
     public void RestartGame()
     {
-        // Handle run start for currency before scene reload
-        PlayerCurrency playerCurrency = FindAnyObjectByType<PlayerCurrency>();
-        if (playerCurrency != null)
-        {
-            playerCurrency.OnRunStart();
-        }
+        var playerCurrency = FindAnyObjectByType<PlayerCurrency>();
+        playerCurrency?.OnRunStart();
 
-        // Resume game time and reset state
         Time.timeScale = 1;
-
-        // Hide game over text
         if (gameOverText != null)
             gameOverText.gameObject.SetActive(false);
 
-        // Reset score timer
-        ScoreManager scoreManager = FindAnyObjectByType<ScoreManager>();
-        if (scoreManager != null)
-        {
-            scoreManager.ResetTimer();
-        }
+        var scoreManager = FindAnyObjectByType<ScoreManager>();
+        scoreManager?.ResetTimer();
 
-        SpellPoolManager pool = FindAnyObjectByType<SpellPoolManager>();
+        var pool = FindAnyObjectByType<SpellPoolManager>();
         pool?.ResetAllSpellsToBase();
 
-        // Reload current scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public void TriggerGameOver()
-    {
-        // Public method to trigger game over from other scripts
-        GameOver();
-    }
+    public void TriggerGameOver() => GameOver();
 
-    // Optional method to explicitly start a new run
     public void StartNewRun()
     {
         FloatingDamageTextManager.Instance.Spawn(new Vector3(0, 2, 0), 123, false);
 
-        PlayerCurrency playerCurrency = FindAnyObjectByType<PlayerCurrency>();
-        if (playerCurrency != null)
-        {
-            playerCurrency.OnRunStart();
-        }
-        PlayerStats stats = FindAnyObjectByType<PlayerStats>();
-        if (stats != null)
-            stats.ResetToBaseValues();
+        var playerCurrency = FindAnyObjectByType<PlayerCurrency>();
+        playerCurrency?.OnRunStart();
 
-        // Other run start logic can go here
+        var stats = FindAnyObjectByType<PlayerStats>();
+        stats?.ResetToBaseValues();
+
         Time.timeScale = 1;
 
         if (gameOverText != null)
             gameOverText.gameObject.SetActive(false);
 
-        SpellPoolManager pool = FindAnyObjectByType<SpellPoolManager>();
+        var pool = FindAnyObjectByType<SpellPoolManager>();
         pool?.ResetAllSpellsToBase();
 
-        ScoreManager scoreManager = FindAnyObjectByType<ScoreManager>();
-        if (scoreManager != null)
-        {
-            scoreManager.ResetTimer();
-        }
+        var scoreManager = FindAnyObjectByType<ScoreManager>();
+        scoreManager?.ResetTimer();
     }
 }

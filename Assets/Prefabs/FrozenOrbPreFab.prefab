@@ -157,7 +157,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   baseDamage: 100
   baseAttackSpeed: 1
-  baseCritChance: 0.5
+  baseCritChance: 0
   baseCritDamage: 1
   baseSize: 4
   baseAOE: 0.1

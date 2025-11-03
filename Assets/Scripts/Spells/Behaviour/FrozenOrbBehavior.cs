@@ -12,11 +12,13 @@ public class FrozenOrbBehavior : MonoBehaviour
     private float aoeRadius;
     private float critChance;
     private float critDamageMultiplier;
-
     private float extraProjBounce;
     private float extraProjCount;
-
     private float remainingBounces;
+
+    private float lifeTimer;
+    private bool active;
+    private GameObject prefabRef;
 
     public void Initialize(
         Vector3 direction,
@@ -30,8 +32,8 @@ public class FrozenOrbBehavior : MonoBehaviour
         float critCh,
         float critMult,
         float projBounce,
-        float projCount
-    )
+        float projCount,
+        GameObject prefabReference = null)
     {
         moveDirection = direction.normalized;
         speed = spd;
@@ -46,16 +48,29 @@ public class FrozenOrbBehavior : MonoBehaviour
         extraProjBounce = Mathf.FloorToInt(projBounce);
         extraProjCount = projCount;
         remainingBounces = extraProjBounce;
-        Destroy(gameObject, lifetime);
+        lifeTimer = 0f;
+        active = true;
+        prefabRef = prefabReference;
     }
 
     void Update()
     {
+        if (!active) return;
+
+        lifeTimer += Time.deltaTime;
+        if (lifeTimer >= lifetime)
+        {
+            ReturnToPool();
+            return;
+        }
+
         transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        if (!active) return;
+
         if (collision.collider.CompareTag("Player") || collision.collider.CompareTag("Projectile"))
             return;
 
@@ -65,7 +80,7 @@ public class FrozenOrbBehavior : MonoBehaviour
 
             if (remainingBounces <= 0)
             {
-                Destroy(gameObject);
+                ReturnToPool();
                 return;
             }
 
@@ -74,7 +89,6 @@ public class FrozenOrbBehavior : MonoBehaviour
             return;
         }
 
-        // hit wall / environment
         if (remainingBounces > 0)
         {
             remainingBounces--;
@@ -82,10 +96,9 @@ public class FrozenOrbBehavior : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            ReturnToPool();
         }
     }
-   
 
     private void ApplyDamage()
     {
@@ -102,7 +115,7 @@ public class FrozenOrbBehavior : MonoBehaviour
             if (isCrit)
                 damage *= critDamageMultiplier;
 
-            health.TakeDamage(damage, isCrit);
+            health.TakeDamage(damage, isCrit, "Frozen Orb");
 
             if (Random.value <= slowChance)
             {
@@ -110,6 +123,12 @@ public class FrozenOrbBehavior : MonoBehaviour
                 status?.ApplySlow(slowAmount, slowDuration);
             }
         }
+    }
+
+    private void ReturnToPool()
+    {
+        active = false;
+        ProjectilePool.Instance.Return(prefabRef, gameObject);
     }
 
     void OnDrawGizmosSelected()

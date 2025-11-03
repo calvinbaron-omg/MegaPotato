@@ -16,24 +16,29 @@ public class EnemySpawner : MonoBehaviour
     public float spawnRangeZ = 20f;
 
     [Header("Spawn Timing")]
-    public float spawnInterval = 5f;
+    public float baseSpawnInterval = 5f;   // Base interval between spawns
+    public float minSpawnInterval = 1.5f;  // Hard cap so it never gets too fast
+    private float spawnInterval;
     public float startDelay = 2f;
     public int enemiesPerSpawn = 2;
 
     [Header("Elite Spawn Chance")]
     [Range(0f, 100f)]
-    public float baseEliteSpawnChance = 5f; // Base 5%
+    public float baseEliteSpawnChance = 5f; // Base 5% chance
+    public float maxEliteChance = 50f;      // Hard cap at 50%
 
     private float spawnTimer = 0f;
+    private float runStartTime;
 
     void Start()
     {
+        spawnInterval = baseSpawnInterval;
         spawnTimer = -startDelay;
+        runStartTime = Time.time;
     }
 
     void Update()
     {
-        // 🔍 Always check for valid player + stats
         if (player == null || playerStats == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -54,6 +59,9 @@ public class EnemySpawner : MonoBehaviour
                 SpawnEnemyAtRandomPosition();
 
             spawnTimer = 0f;
+
+            // 🔹 Adjust difficulty dynamically
+            UpdateDifficultyScaling();
         }
     }
 
@@ -74,30 +82,69 @@ public class EnemySpawner : MonoBehaviour
             return;
 
         // 🎯 Calculate effective elite chance
-        float effectiveEliteChance = baseEliteSpawnChance;
-
-        if (playerStats != null)
-        {
-            // Player bonus adds as % of base (0.1 = +10%, 1 = +100%, etc.)
-            float bonusMultiplier = 1f + playerStats.GetEliteSpawnChance();
-            effectiveEliteChance = baseEliteSpawnChance * bonusMultiplier;
-        }
-
-        // Clamp to avoid exceeding 100%
-        effectiveEliteChance = Mathf.Clamp(effectiveEliteChance, 0f, 100f);
+        float effectiveEliteChance = GetScaledEliteChance();
 
         // Roll for elite
         bool isElite = Random.Range(0f, 100f) < effectiveEliteChance;
 
+        GameObject enemyToSpawn = null;
         if (isElite && eliteEnemyPrefabs.Length > 0)
         {
-            GameObject eliteEnemyToSpawn = eliteEnemyPrefabs[Random.Range(0, eliteEnemyPrefabs.Length)];
-            Instantiate(eliteEnemyToSpawn, spawnPos, Quaternion.identity);
+            enemyToSpawn = eliteEnemyPrefabs[Random.Range(0, eliteEnemyPrefabs.Length)];
         }
         else if (enemyPrefabs.Length > 0)
         {
-            GameObject enemyToSpawn = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
-            Instantiate(enemyToSpawn, spawnPos, Quaternion.identity);
+            enemyToSpawn = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+        }
+
+        if (enemyToSpawn == null) return;
+
+        GameObject enemyInstance = Instantiate(enemyToSpawn, spawnPos, Quaternion.identity);
+
+        // 🔹 Apply scaling to health & damage (if manager exists)
+        if (EnemyScalingManager.Instance != null)
+        {
+            float mult = EnemyScalingManager.Instance.GetCurrentMultiplier();
+            EnemyHealth eHealth = enemyInstance.GetComponent<EnemyHealth>();
+            if (eHealth != null)
+            {
+                eHealth.maxHealth *= mult;
+                eHealth.currentHealth = eHealth.maxHealth;
+            }
+
+            EnemyMovement eMovement = enemyInstance.GetComponent<EnemyMovement>();
+            if (eMovement != null)
+                eMovement.damageAmount *= mult;
         }
     }
+
+    private void UpdateDifficultyScaling()
+    {
+        float elapsedMinutes = (Time.time - runStartTime) / 60f;
+
+        // 🔹 If overtime, double the spawn scaling rate
+        bool isOvertime = EnemyScalingManager.Instance != null && EnemyScalingManager.Instance.IsOvertime;
+
+        float scaleFactor = isOvertime ? 2f : 1f;
+        float spawnScale = Mathf.Clamp01((elapsedMinutes / 15f) * scaleFactor);
+        spawnInterval = Mathf.Lerp(baseSpawnInterval, minSpawnInterval, spawnScale);
+    }
+
+    private float GetScaledEliteChance()
+    {
+        float elapsedMinutes = (Time.time - runStartTime) / 60f;
+        bool isOvertime = EnemyScalingManager.Instance != null && EnemyScalingManager.Instance.IsOvertime;
+
+        float overtimeBonus = isOvertime ? 3f : 2f; // elites rise +3%/min in overtime
+        float scaledChance = baseEliteSpawnChance + (elapsedMinutes * overtimeBonus);
+
+        if (playerStats != null)
+        {
+            float bonusMultiplier = 1f + playerStats.GetEliteSpawnChance();
+            scaledChance *= bonusMultiplier;
+        }
+        return Mathf.Clamp(scaledChance, 0f, maxEliteChance);
+    }
+
+
 }

@@ -45,7 +45,7 @@ public class PlayerHealth : Health
         }
     }
 
-    public override void TakeDamage(float amount, bool isCrit = false)
+    public override void TakeDamage(float amount, bool isCrit = false, string source = "Unknown")
     {
         // Ignore all damage while invincible or shielded
         if (isInvincible) return;

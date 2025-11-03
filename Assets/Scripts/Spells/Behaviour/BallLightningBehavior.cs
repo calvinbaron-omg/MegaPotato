@@ -12,10 +12,13 @@ public class BallLightningBehavior : MonoBehaviour
     private float aoeRadius;
     private float critChance;
     private float critDamageMultiplier;
-
     private float extraProjBounce;
     private float extraProjCount;
     private float remainingBounces;
+
+    private float lifeTimer;
+    private bool active;
+    private GameObject prefabRef;
 
     public void Initialize(
         Vector3 direction,
@@ -29,8 +32,8 @@ public class BallLightningBehavior : MonoBehaviour
         float critCh,
         float critMult,
         float projBounce,
-        float projCount
-    )
+        float projCount,
+        GameObject prefabReference = null)
     {
         moveDirection = direction.normalized;
         speed = spd;
@@ -45,17 +48,28 @@ public class BallLightningBehavior : MonoBehaviour
         extraProjBounce = Mathf.FloorToInt(projBounce);
         extraProjCount = projCount;
         remainingBounces = extraProjBounce;
-
-        Destroy(gameObject, lifetime);
+        lifeTimer = 0f;
+        active = true;
+        prefabRef = prefabReference;
     }
 
     void Update()
     {
+        if (!active) return;
+
+        lifeTimer += Time.deltaTime;
+        if (lifeTimer >= lifetime)
+        {
+            ReturnToPool();
+            return;
+        }
+
         transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        if (!active) return;
         if (collision.collider.CompareTag("Player") || collision.collider.CompareTag("Projectile"))
             return;
 
@@ -65,19 +79,17 @@ public class BallLightningBehavior : MonoBehaviour
 
             if (remainingBounces <= 0)
             {
-                Destroy(gameObject);
+                ReturnToPool();
                 return;
             }
 
             remainingBounces--;
-            // ⚡ Add slight random deviation for chaotic bounce
             Vector3 normal = collision.contacts[0].normal;
             moveDirection = Vector3.Reflect(moveDirection, normal);
             moveDirection = Quaternion.Euler(0, Random.Range(-15f, 15f), 0) * moveDirection;
             return;
         }
 
-        // Hit environment / walls
         if (remainingBounces > 0)
         {
             remainingBounces--;
@@ -87,7 +99,7 @@ public class BallLightningBehavior : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            ReturnToPool();
         }
     }
 
@@ -106,15 +118,20 @@ public class BallLightningBehavior : MonoBehaviour
             if (isCrit)
                 damage *= critDamageMultiplier;
 
-            health.TakeDamage(damage, isCrit);
+            health.TakeDamage(damage, isCrit, "Ball Lightning");
 
-            // ⚡ Shock effect (slow or stun)
             if (Random.value <= shockChance)
             {
                 EnemyStatus status = enemy.GetComponent<EnemyStatus>();
                 status?.ApplySlow(shockAmount, shockDuration);
             }
         }
+    }
+
+    private void ReturnToPool()
+    {
+        active = false;
+        ProjectilePool.Instance.Return(prefabRef, gameObject);
     }
 
     void OnDrawGizmosSelected()

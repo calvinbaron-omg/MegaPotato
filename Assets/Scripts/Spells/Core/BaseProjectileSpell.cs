@@ -146,7 +146,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
 
     public void ApplyUpgradeAndLevel(List<RolledUpgradeChoice> selectedUpgrades)
     {
-        PlayerStats player = FindObjectOfType<PlayerStats>();
+        PlayerStats player = FindFirstObjectByType<PlayerStats>();
         if (player != null)
         {
             SpellRuntimeStats effective = CalculateEffectiveStats(player);
@@ -183,7 +183,7 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
             Debug.Log("Upgrading : " + upgrade.statType + " + " + upgrade.effectiveValue);
         }
         LevelUp();
-        PlayerStats ps = FindObjectOfType<PlayerStats>();
+        PlayerStats ps = FindFirstObjectByType<PlayerStats>();
         if (ps != null)
         {
             SpellRuntimeStats effective = CalculateEffectiveStats(ps);
@@ -304,14 +304,23 @@ public abstract class BaseProjectileSpell : MonoBehaviour, ISpell
     public abstract void CastSpell(Transform caster, Vector3 targetPosition, Vector3 targetScale);
 
     // direction should already be normalized
+    // protected virtual GameObject CreateProjectile(Transform caster, Vector3 direction, float heightOffset = 1.1f)
+    // {
+    //     // spawn where the "muzzle" would be: player height + forward offset
+    //     Vector3 spawnPos =
+    //         caster.position
+    //         + Vector3.up * heightOffset
+    //         + direction * 1f; // 1 unit in front
+    //     GameObject proj = Instantiate(spellProjectilePrefab, spawnPos, Quaternion.identity);
+    //     EnsureProjectileComponents(proj);
+    //     return proj;
+    // }
     protected virtual GameObject CreateProjectile(Transform caster, Vector3 direction, float heightOffset = 1.1f)
     {
-        // spawn where the "muzzle" would be: player height + forward offset
-        Vector3 spawnPos =
-            caster.position
-            + Vector3.up * heightOffset
-            + direction * 1f; // 1 unit in front
-        GameObject proj = Instantiate(spellProjectilePrefab, spawnPos, Quaternion.identity);
+        Vector3 spawnPos = caster.position + Vector3.up * heightOffset + direction * 1f;
+
+        GameObject proj = ProjectilePool.Instance.Get(spellProjectilePrefab, spawnPos, Quaternion.identity);
+
         EnsureProjectileComponents(proj);
         return proj;
     }

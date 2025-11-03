@@ -67,7 +67,8 @@ public class SpellFrozenOrb : BaseProjectileSpell
                 effective.critChance,
                 effective.critDamage,
                 effective.bounces,
-                effective.count
+                effective.count,
+                spellProjectilePrefab
             );
         }
 

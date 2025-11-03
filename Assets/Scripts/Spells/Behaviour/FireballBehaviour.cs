@@ -12,10 +12,13 @@ public class FireballBehavior : MonoBehaviour
     private float aoeRadius;
     private float critChance;
     private float critDamageMultiplier;
-
     private float extraProjBounce;
     private float extraProjCount;
     private float remainingBounces;
+
+    private float lifeTimer;
+    private bool active;
+    private GameObject prefabRef;
 
     public void Initialize(
         Vector3 direction,
@@ -29,8 +32,8 @@ public class FireballBehavior : MonoBehaviour
         float critCh,
         float critMult,
         float projBounce,
-        float projCount
-    )
+        float projCount,
+        GameObject prefabReference = null)
     {
         moveDirection = direction.normalized;
         speed = spd;
@@ -45,17 +48,28 @@ public class FireballBehavior : MonoBehaviour
         extraProjBounce = Mathf.FloorToInt(projBounce);
         extraProjCount = projCount;
         remainingBounces = extraProjBounce;
-
-        Destroy(gameObject, lifetime);
+        lifeTimer = 0f;
+        active = true;
+        prefabRef = prefabReference;
     }
 
     void Update()
     {
+        if (!active) return;
+
+        lifeTimer += Time.deltaTime;
+        if (lifeTimer >= lifetime)
+        {
+            ReturnToPool();
+            return;
+        }
+
         transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        if (!active) return;
         if (collision.collider.CompareTag("Player") || collision.collider.CompareTag("Projectile"))
             return;
 
@@ -65,7 +79,7 @@ public class FireballBehavior : MonoBehaviour
 
             if (remainingBounces <= 0)
             {
-                Destroy(gameObject);
+                ReturnToPool();
                 return;
             }
 
@@ -74,7 +88,6 @@ public class FireballBehavior : MonoBehaviour
             return;
         }
 
-        // Hit wall / environment
         if (remainingBounces > 0)
         {
             remainingBounces--;
@@ -82,7 +95,7 @@ public class FireballBehavior : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            ReturnToPool();
         }
     }
 
@@ -101,15 +114,20 @@ public class FireballBehavior : MonoBehaviour
             if (isCrit)
                 damage *= critDamageMultiplier;
 
-            health.TakeDamage(damage, isCrit);
+            health.TakeDamage(damage, isCrit, "Fire Ball");
 
-            // 🔥 Apply burn effect
             if (Random.value <= burnChance)
             {
                 EnemyStatus status = enemy.GetComponent<EnemyStatus>();
                 status?.ApplyBurn(burnDamage, burnDuration);
             }
         }
+    }
+
+    private void ReturnToPool()
+    {
+        active = false;
+        ProjectilePool.Instance.Return(prefabRef, gameObject);
     }
 
     void OnDrawGizmosSelected()

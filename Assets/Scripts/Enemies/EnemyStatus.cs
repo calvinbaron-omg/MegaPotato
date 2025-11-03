@@ -70,7 +70,7 @@ public class EnemyStatus : MonoBehaviour
         {
             if (enemyHealth != null)
             {
-                enemyHealth.TakeDamage(burnDamagePerTick);
+                enemyHealth.TakeDamage(burnDamagePerTick, false, "Fire Ball Burn");
             }
             yield return new WaitForSeconds(0.5f);
         }

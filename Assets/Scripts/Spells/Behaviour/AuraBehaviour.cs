@@ -145,7 +145,7 @@ public class AuraBehavior : MonoBehaviour
             if (isCrit)
                 dmg *= critDamage;
 
-            health.TakeDamage(dmg, isCrit);
+            health.TakeDamage(dmg, isCrit, "Aura");
         }
     }
 

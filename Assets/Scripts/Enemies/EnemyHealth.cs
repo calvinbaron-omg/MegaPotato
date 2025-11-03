@@ -11,10 +11,14 @@ public class EnemyHealth : Health
         PlayerLevel playerLevel = GameObject.FindFirstObjectByType<PlayerLevel>(); ;
     }
 
-    public override void TakeDamage(float amount, bool isCrit = false)
+    public override void TakeDamage(float amount, bool isCrit = false, string source = "Unknown")
     {
-        base.TakeDamage(amount, isCrit);
+        // Log damage source for player DPS tracking
+        DamageTracker.Instance?.RegisterDamage(source, amount);
+
+        base.TakeDamage(amount, isCrit, source);
     }
+
 
     protected override void HandleDeath()
     {

@@ -5,8 +5,8 @@ public class SpellSmite : BaseProjectileSpell
 {
     [Header("Smite Settings")]
     [SerializeField] private GameObject smiteImpactPrefab; // prefab with SmiteBehavior attached
-    [SerializeField] private float rangeMultiplier = 1.2f;
-    [SerializeField] private float multiStrikeDelay = 0.05f; // slight delay between strikes
+    //[SerializeField] private float rangeMultiplier = 1.2f;
+    //[SerializeField] private float multiStrikeDelay = 0.05f; // slight delay between strikes
 
     public override void CastSpell(Transform caster, Vector3 targetPosition, Vector3 targetScale)
     {
@@ -33,20 +33,22 @@ public class SpellSmite : BaseProjectileSpell
         }
         if (enemy == null) return;
         if (smiteImpactPrefab != null)
+        {
+            GameObject impact = ProjectilePool.Instance.Get(smiteImpactPrefab, enemy.position, Quaternion.identity);
+            SmiteBehavior smite = impact.GetComponent<SmiteBehavior>();
+            if (smite != null)
             {
-                GameObject impact = Instantiate(smiteImpactPrefab, enemy.position, Quaternion.identity);
-                SmiteBehavior smite = impact.GetComponent<SmiteBehavior>();
-                if (smite != null)
-                {
-                    smite.Initialize(
+                smite.Initialize(
                     effective.damage,
                     effective.size,
                     effective.critChance,
                     effective.critDamage,
-                    Mathf.FloorToInt(effective.count)
+                    Mathf.FloorToInt(effective.count),
+                    smiteImpactPrefab
                 );
-                }
             }
+        }
+
     }
     public override List<SpellStatType> GetUpgradeableStats() =>
         new List<SpellStatType> {
